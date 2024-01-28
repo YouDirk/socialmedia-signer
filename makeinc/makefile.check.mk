@@ -15,18 +15,3 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-SUBDIR_MAKE  := src
-SUBDIR_CLEAN := makeinc
-
-.PHONY: all run debug clean clean-all
-all run debug: $(OUTPUT)
-	$(MAKE) -C $(SUBDIR_MAKE) $@
-
-.PHONY: clean
-clean:
-	$(MAKE) -C $(SUBDIR_MAKE) $@
-	-rm -f .gitignore~ $(SUBDIR_CLEAN)/*~ $(SUBDIR_CLEAN)/*.bak \
-	   *~ *.bak
-
-.PHONY: clean-all
-clean-all: clean
