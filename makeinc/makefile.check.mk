@@ -41,7 +41,7 @@ endif
 # --------------------------------------------------------------------
 # optional features
 
-AS_OPT := $(call _CMD_TEST,g++2,(optional) assembler)
+AS_OPT := $(call _CMD_TEST,g++,(optional) assembler)
 ifeq (,$(AS_OPT))
   $(call _CMD_TEST_RESNO,g++)
   $(shell echo 'AS_OPT =' >> $(MAKE_CACHEFILE))
