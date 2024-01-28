@@ -15,3 +15,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+include ../makeinc/makefile.variables.mk
+
+# ********************************************************************
+# Linux commands, feature check
+
+$(info *************************)
+
+# End of Linux commands, feature check
+# ********************************************************************
+
+.PHONY: _cache
+_cache:

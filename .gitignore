@@ -15,13 +15,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+# Build targets
+/src/socialmedia-signer
+
 # C++ stuff
 /src/*.d
 /src/*.o
 /src/mtrace.log
 
-# Building targets
-/src/socialmedia-signer
+# Make stuff
+/.makefile.cache.mk
 
 # Backup files
 *~

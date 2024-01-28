@@ -17,6 +17,8 @@
 
 include ../makefile.config.mk
 
+include ../.makefile.cache.mk
+
 include ../makeinc/makefile.variables.mk
 
 # ********************************************************************
@@ -71,7 +73,7 @@ clean: clean-deps
 
 .PHONY: clean-all
 clean-all: clean clean-tags
-	-rm -f $(OUTPUT)
+	-rm -f $(MAKE_CACHEFILE) $(OUTPUT)
 
 %.$(DEPEXT): %.$(CEXT) $(MAKEFILEZ)
 	@-$(MAKEDEP) -E -MQ $*.$(OEXT) -o $@ $<
@@ -100,6 +102,11 @@ $(OUTPUT): $(OBJFILES)
 	$(LD) $(LDFLAGS) -o $@ $^ $(addprefix -l,$(LIBS))
 
 -include $(DEPFILES)
+
+# --------------------------------------------------------------------
+
+$(MAKE_CACHEFILE): $(MAKEFILEZ)
+	echo > $@ && $(MAKE) -f ../makeinc/makefile.check.mk
 
 # End of Targets
 # ********************************************************************

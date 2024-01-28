@@ -15,10 +15,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+SUBDIRS := src
+
+# ********************************************************************
+# Feature check stuff.
+
+_BLANK :=
+define NL
+
+$(_BLANK)
+endef
+ERRB  = $(NL)$(NL)  ERROR:
+WARNB = $(NL)$(NL)  warning:
+
+_CMD_TEST = \
+  $(eval _CMD_TEST_BUF:=checking for $(2)... )$(\
+  )$(shell which $(1) 2> /dev/null)
+_HEADER_TEST = \
+  $(eval _CMD_TEST_BUF:=checking for $(2)... )$(\
+  )$(shell ls /usr/include/$(1) 2> /dev/null)
+
+_CMD_TEST_RESULT = $(info $(_CMD_TEST_BUF)$(1))
+_CMD_TEST_RESNO = $(info $(_CMD_TEST_BUF)no - Debian package $(1))
+_CMD_TEST_RESNO_ERR = $(error $(ERRB) Run (Debian): $$> apt-get install \
+  $(1)$(NL)$(NL) $(2) not found!  After install run '$$> make clean-all')
+
 # ********************************************************************
 # Common variables
-
-SUBDIRS := src
 
 # No .MAKEFILE.CACHE.MK here, because: .MAKEFILE.CACHE.MK depends on
 # $(MAKEFILEZ).
@@ -27,6 +50,8 @@ MAKEFILEZ := ../Makefile ../makefile.config.mk \
   ../makeinc/makefile.check.mk \
   \
   $(patsubst %,../%/Makefile,$(SUBDIRS))
+
+MAKE_CACHEFILE := ../.makefile.cache.mk
 
 # ********************************************************************
 
@@ -70,10 +95,9 @@ ASFLAGS := $(CCFLAGS)
 LDFLAGS := $(FLAGS) $(addprefix -L,$(LD_PATHS))
 DEBUGGERFLAGS  := --quiet
 
-NULLCHAR       :=
 RUN_ENV        := \
-  LD_PRELOAD=$$LD_PRELOAD:$(subst $(NULLCHAR) ,:,$(LD_PRELOADS)) \
-  LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(subst $(NULLCHAR) ,:,$(LD_PATHS))
+  LD_PRELOAD=$$LD_PRELOAD:$(subst $(_BLANK) ,:,$(LD_PRELOADS)) \
+  LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(subst $(_BLANK) ,:,$(LD_PATHS))
 
 TAGEDFILES     := $(wildcard *.$(CEXT) *.$(HEXT) *.$(SEXT))
 

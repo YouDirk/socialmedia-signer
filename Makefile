@@ -22,11 +22,13 @@ SUBDIR_CLEAN := makeinc
 all run debug: $(OUTPUT)
 	$(MAKE) -C $(SUBDIR_MAKE) $@
 
-.PHONY: clean
-clean:
-	$(MAKE) -C $(SUBDIR_MAKE) $@
+.PHONY: _clean clean
+_clean:
 	-rm -f .gitignore~ $(SUBDIR_CLEAN)/*~ $(SUBDIR_CLEAN)/*.bak \
 	   *~ *.bak
+clean: _clean
+	$(MAKE) -C $(SUBDIR_MAKE) $@
 
 .PHONY: clean-all
-clean-all: clean
+clean-all: _clean
+	$(MAKE) -C $(SUBDIR_MAKE) $@
