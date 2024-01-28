@@ -34,18 +34,28 @@ recompile: clean all
 run: all
 	@-rm -f $(MTRACEFILE)
 	$(RUN_ENV) MALLOC_TRACE=$(MTRACEFILE) ./$(OUTPUT) $(ARGS)
-	test -f $(MTRACEFILE) \
-	  && $(MTRACE) $(OUTPUT) $(MTRACEFILE) 2> /dev/null || true
+ifneq (,$(MTRACE_OPT))
+	$(MTRACE_OPT) $(OUTPUT) $(MTRACEFILE) || true
+endif
 
 .PHONY: debug
 debug: all
-	$(RUN_ENV) $(DEBUGGER) $(DEBUGGERFLAGS) $(OUTPUT)
+ifeq (,$(GDB_OPT))
+	$(call _CMD_TEST_RESNO_ERR,gdb,debugger)
+else
+	$(RUN_ENV) $(GDB_OPT) $(DEBUGGERFLAGS) --args $(OUTPUT) $(ARGS)
+endif
 
 # Set in GDB shell: 'set environment LD_LIBRARY_PATH=../lib'
 
 .PHONY: debug-emacs
 debug-emacs: all
-	$(RUN_ENV) $(DEBUGGER) -i=mi $(DEBUGGERFLAGS) $(OUTPUT)
+ifeq (,$(GDB_OPT))
+	$(call _CMD_TEST_RESNO_ERR,gdb,debugger)
+else
+	$(RUN_ENV) $(GDB_OPT) -i=mi $(DEBUGGERFLAGS) --args $(OUTPUT) \
+	  $(ARGS)
+endif
 
 .PHONY: ctags
 ctags: $(CTAGSFILE)
@@ -86,17 +96,34 @@ clean-all: clean clean-tags
 	$(CC) -S $(CCFLAGS) -o $@ $<
 %.$(OEXT): %.$(CEXT) $(MAKEFILEZ)
 	$(CC) -c $(CCFLAGS) -o $@ $<
+
 %.$(OEXT): %.$(SEXT) $(MAKEFILEZ)
-	$(AS) -c $(ASFLAGS) -o $@ $<
+ifeq (,$(AS_OPT))
+	$(call _CMD_TEST_RESNO_ERR,g++,assembler)
+else
+	$(AS_OPT) -c $(ASFLAGS) -o $@ $<
+endif
 
 $(CTAGSFILE): $(TAGEDFILES)
-	$(CTAGS) $(CTAGSFLAGS) -o $@ $^
+ifeq (,$(CTAGS_OPT))
+	$(call _CMD_TEST_RESNO_ERR,emacs-bin-common,CTAGS command)
+else
+	$(CTAGS_OPT) $(CTAGSFLAGS) -o $@ $^
+endif
 
 $(ETAGSFILE): $(TAGEDFILES)
-	$(ETAGS) $(ETAGSFLAGS) -o $@ $^
+ifeq (,$(ETAGS_OPT))
+	$(call _CMD_TEST_RESNO_ERR,emacs-bin-common,ETAGS command)
+else
+	$(ETAGS_OPT) $(ETAGSFLAGS) -o $@ $^
+endif
 
 $(EBROWSEFILE): $(TAGEDFILES)
-	$(EBROWSE) $(EBROWSEFLAGS) -o $@ $^
+ifeq (,$(EBROWSE_OPT))
+	$(call _CMD_TEST_RESNO_ERR,emacs-bin-common,EBROWSE command)
+else
+	$(EBROWSE_OPT) $(EBROWSEFLAGS) -o $@ $^
+endif
 
 $(OUTPUT): $(OBJFILES)
 	$(LD) $(LDFLAGS) -o $@ $^ $(addprefix -l,$(LIBS))

@@ -55,27 +55,25 @@ MAKE_CACHEFILE := ../.makefile.cache.mk
 
 # ********************************************************************
 
+DFLAGS         := -DDEBUG
 DEBUGFLAGS     := -g
 OPTFLAG        := -O0
-LD_PRELOADS    := /usr/lib/x86_64-linux-gnu/libc_malloc_debug.so
+LD_PRELOADS    :=
 
 INCLUDE_PATHS  :=
 LD_PATHS       :=
 LIBS           :=
 
+# TODO: Debug switch
+ifneq (,$(MTRACE_OPT))
+  LD_PRELOADS  += libc_malloc_debug.so
+  DFLAGS       += -DHAS_MTRACE
+endif
+
 MTRACEFILE     := mtrace.log
 EBROWSEFILE    := BROWSE
 CTAGSFILE      := tags
 ETAGSFILE      := TAGS
-
-CC := g++
-AS := g++
-LD := g++
-DEBUGGER := gdb
-MTRACE := mtrace
-EBROWSE := ebrowse
-CTAGS := ctags
-ETAGS := etags
 
 CEXT           := cpp
 HEXT           := hpp
@@ -90,7 +88,7 @@ OBJFILES       := $(OBJ:=.$(OEXT))
 DEPFILES       := $(OBJ:=.$(DEPEXT))
 
 FLAGS := $(DEBUGFLAGS) -Wall -Wextra -Wformat-security $(OPTFLAG)
-CCFLAGS := $(FLAGS) -DDEBUG $(addprefix -I,$(INCLUDE_PATHS))
+CCFLAGS := $(FLAGS) $(DFLAGS) $(addprefix -I,$(INCLUDE_PATHS))
 ASFLAGS := $(CCFLAGS)
 LDFLAGS := $(FLAGS) $(addprefix -L,$(LD_PATHS))
 DEBUGGERFLAGS  := --quiet

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef DEBUG
+#ifdef HAS_MTRACE
 #  include <mcheck.h>
 #  define MTRACE()                 mtrace()
 #  define MUNTRACE()               muntrace()
