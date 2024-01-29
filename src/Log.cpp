@@ -16,35 +16,39 @@
  */
 
 
-#include "Params.hpp"
+#include "Log.hpp"
 
-#include "common.hpp"
+#include <iostream>
 
 /* ***************************************************************  */
 
-using namespace socialmedia_signer;
-
-int
-main(int argc, const char** argv)
+#ifdef DEBUG
+void socialmedia_signer::Log::debug(const u8str& msg)
 {
-  MTRACE();
+  std::clog << "DEBUG: " << (const char*) msg.data() << "\n";
+}
+#endif
 
-  Params::init(argc, argv);
+void socialmedia_signer::Log::info(const u8str& msg)
+{
+  std::clog << "info: " << (const char*) msg.data() << "\n";
+}
 
-  /* -------------------------------------------------------------  */
+void socialmedia_signer::Log::warn(const u8str& msg)
+{
+  std::clog << "Warning: " << (const char*) msg.data() << "\n";
+}
 
-  // TODO ...
-  Log::debug((u8str) u8"Hello ääää€ World!"
-             + u8"😀 Hello 😀");
+void socialmedia_signer::Log::error(const u8str& msg)
+{
+  std::clog << "ERROR: " << (const char*) msg.data() << "\n";
+}
 
-  Params::get();
+void socialmedia_signer::Log::fatal(const u8str& msg, int exit_code)
+{
+  std::clog << "FATAL: " << (const char*) msg.data() << "\n";
 
-  /* -------------------------------------------------------------  */
-
-  Params::release();
-
-  MUNTRACE();
-  return EXIT_SUCCESS;
+  exit(exit_code);
 }
 
 /* ***************************************************************  */

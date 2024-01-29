@@ -19,9 +19,9 @@
 #ifndef COMMON_HPP__
 #define COMMON_HPP__
 
-#include <stdio.h>
+/* ***************************************************************  */
+
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef HAS_MTRACE
 #  include <mcheck.h>
@@ -31,5 +31,15 @@
 #  define MTRACE()
 #  define MUNTRACE()
 #endif
+
+#include <string>
+
+typedef std::u8string              u8str;
+
+/* ***************************************************************  */
+
+#include "Log.hpp"
+
+/* ***************************************************************  */
 
 #endif /* COMMON_HPP__  */

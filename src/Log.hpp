@@ -16,35 +16,37 @@
  */
 
 
-#include "Params.hpp"
+#ifndef LOG_HPP__
+#define LOG_HPP__
 
 #include "common.hpp"
 
-/* ***************************************************************  */
-
-using namespace socialmedia_signer;
-
-int
-main(int argc, const char** argv)
-{
-  MTRACE();
-
-  Params::init(argc, argv);
-
-  /* -------------------------------------------------------------  */
-
-  // TODO ...
-  Log::debug((u8str) u8"Hello ääää€ World!"
-             + u8"😀 Hello 😀");
-
-  Params::get();
-
-  /* -------------------------------------------------------------  */
-
-  Params::release();
-
-  MUNTRACE();
-  return EXIT_SUCCESS;
-}
+namespace socialmedia_signer {
 
 /* ***************************************************************  */
+
+class Log {
+public:
+  /* Abstract class  */
+  Log()           = delete;
+  Log(Log& other) = delete;
+  virtual ~Log()  = 0;
+
+#ifdef DEBUG
+  static void debug(const u8str& msg);
+#else
+  static void debug(const u8str& msg) {};
+#endif
+
+  static void info(const u8str& msg);
+  static void warn(const u8str& msg);
+  static void error(const u8str& msg);
+
+  static void fatal(const u8str& msg, int exit_code = 0xff);
+};
+
+/* ***************************************************************  */
+
+};
+
+#endif /* LOG_HPP__  */

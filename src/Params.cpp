@@ -18,33 +18,45 @@
 
 #include "Params.hpp"
 
-#include "common.hpp"
+/* ***************************************************************  */
+
+socialmedia_signer::Params* socialmedia_signer::Params::instance \
+  = nullptr;
 
 /* ***************************************************************  */
 
-using namespace socialmedia_signer;
-
-int
-main(int argc, const char** argv)
+socialmedia_signer::Params::Params(int argc, const char** argv)
 {
-  MTRACE();
+  const char8_t** u8argv = (const char8_t**) argv;
 
-  Params::init(argc, argv);
+  // TODO: Own u8str class which are including conversions
+  Log::debug((char8_t*) std::to_string(argc).data());
+}
 
-  /* -------------------------------------------------------------  */
+socialmedia_signer::Params::~Params()
+{
+  // TODO
+}
 
-  // TODO ...
-  Log::debug((u8str) u8"Hello ääää€ World!"
-             + u8"😀 Hello 😀");
+void socialmedia_signer::Params::init(int argc, const char** argv)
+{
+  if (instance != nullptr)
+    Log::fatal(u8"Command line parameters double parsed!");
 
-  Params::get();
+  instance = new Params(argc, argv);
+}
 
-  /* -------------------------------------------------------------  */
+void socialmedia_signer::Params::release()
+{
+  delete instance;
+}
 
-  Params::release();
+socialmedia_signer::Params* socialmedia_signer::Params::get()
+{
+  if (instance == nullptr)
+    Log::fatal(u8"Command line parameters not parsed!");
 
-  MUNTRACE();
-  return EXIT_SUCCESS;
+  return instance;
 }
 
 /* ***************************************************************  */

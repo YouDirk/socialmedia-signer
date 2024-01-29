@@ -16,35 +16,32 @@
  */
 
 
-#include "Params.hpp"
+#ifndef PARAMS_HPP__
+#define PARAMS_HPP__
 
 #include "common.hpp"
 
-/* ***************************************************************  */
-
-using namespace socialmedia_signer;
-
-int
-main(int argc, const char** argv)
-{
-  MTRACE();
-
-  Params::init(argc, argv);
-
-  /* -------------------------------------------------------------  */
-
-  // TODO ...
-  Log::debug((u8str) u8"Hello ääää€ World!"
-             + u8"😀 Hello 😀");
-
-  Params::get();
-
-  /* -------------------------------------------------------------  */
-
-  Params::release();
-
-  MUNTRACE();
-  return EXIT_SUCCESS;
-}
+namespace socialmedia_signer {
 
 /* ***************************************************************  */
+
+class Params {
+public:
+  /* Singleton class  */
+  static void init(int argc, const char** argv);
+  static void release();
+
+  static Params* get();
+
+private:
+  explicit Params(int argc, const char** argv);
+  virtual ~Params();
+
+  static Params* instance;
+};
+
+/* ***************************************************************  */
+
+};
+
+#endif /* PARAMS_HPP__  */

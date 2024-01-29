@@ -55,6 +55,9 @@ MAKE_CACHEFILE := ../.makefile.cache.mk
 
 # ********************************************************************
 
+# At least C++20 is required to enable the UTF-8 specific type char8_t.
+CCSTDFLAG      := -std=c++20
+
 DFLAGS         := -DVERSION=$(VERSION)
 DEBUGFLAGS     :=
 OPTFLAG        := -O3
@@ -97,7 +100,8 @@ OBJFILES       := $(OBJ:=.$(OEXT))
 DEPFILES       := $(OBJ:=.$(DEPEXT))
 
 FLAGS := $(DEBUGFLAGS) -Wall -Wextra -Wformat-security $(OPTFLAG)
-CCFLAGS := $(FLAGS) $(DFLAGS) $(addprefix -I,$(INCLUDE_PATHS))
+CCFLAGS := \
+  $(FLAGS) $(CCSTDFLAG) $(DFLAGS) $(addprefix -I,$(INCLUDE_PATHS))
 ASFLAGS := $(CCFLAGS)
 LDFLAGS := $(FLAGS) $(addprefix -L,$(LD_PATHS))
 DEBUGGERFLAGS  := --quiet
