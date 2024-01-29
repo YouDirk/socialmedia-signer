@@ -34,7 +34,7 @@ recompile: clean all
 run: all
 	@-rm -f $(MTRACEFILE)
 	$(RUN_ENV) MALLOC_TRACE=$(MTRACEFILE) ./$(OUTPUT) $(ARGS)
-ifneq (,$(MTRACE_OPT))
+ifneq (,$(HAS_MTRACE))
 	$(MTRACE_OPT) $(OUTPUT) $(MTRACEFILE) || true
 endif
 

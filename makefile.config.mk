@@ -13,3 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+# ********************************************************************
+
+# Debug build?  Possible values: [1, 0], default: 1
+#
+# Will be overridden by CI/CD.
+DEBUG               := 1
+
+# See 'Semantic Versioning 2.0.0' for more details.
+#
+# Will be overridden by CI/CD.
+VERSION             := 0.1.0-dev
+
+# ********************************************************************

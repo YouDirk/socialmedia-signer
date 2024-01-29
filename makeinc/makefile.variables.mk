@@ -55,19 +55,28 @@ MAKE_CACHEFILE := ../.makefile.cache.mk
 
 # ********************************************************************
 
-DFLAGS         := -DDEBUG
-DEBUGFLAGS     := -g
-OPTFLAG        := -O0
+DFLAGS         := -DVERSION=$(VERSION)
+DEBUGFLAGS     :=
+OPTFLAG        := -O3
 LD_PRELOADS    :=
 
 INCLUDE_PATHS  :=
 LD_PATHS       :=
 LIBS           :=
 
-# TODO: Debug switch
-ifneq (,$(MTRACE_OPT))
-  LD_PRELOADS  += libc_malloc_debug.so
-  DFLAGS       += -DHAS_MTRACE
+ifneq (0,$(DEBUG))
+  OPTFLAG        := -O0
+
+  DFLAGS         += -DDEBUG
+  DEBUGFLAGS     += -g
+
+  ifneq (,$(MTRACE_OPT))
+    LD_PRELOADS  += libc_malloc_debug.so
+
+    HAS_MTRACE   := 1
+    DFLAGS       += -DHAS_MTRACE
+  endif
+else
 endif
 
 MTRACEFILE     := mtrace.log
