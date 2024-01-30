@@ -32,11 +32,9 @@
 #  define MUNTRACE()
 #endif
 
-#include <string>
-
-typedef std::u8string              u8str;
-
 /* ***************************************************************  */
+
+#include "ustr.hpp"
 
 #include "Log.hpp"
 

@@ -16,34 +16,39 @@
  */
 
 
-#include "Params.hpp"
+#ifndef USTR_HPP__
+#define USTR_HPP__
 
-#include "common.hpp"
+#include <string>
+#include <codecvt>
+
+using namespace std::string_literals;
 
 /* ***************************************************************  */
 
-using namespace socialmedia_signer;
+namespace socialmedia_signer {
 
-int
-main(int argc, const char** argv)
+class ustr: public std::u32string
 {
-  MTRACE();
+public:
+  ustr(const char8_t* msg);
+  ustr(const std::u8string& msg);
 
-  Params::init(argc, argv);
+  ustr(const char32_t* msg);
+  ustr(const std::u32string& msg);
+  ustr(const char32_t msg);
 
-  /* -------------------------------------------------------------  */
+  void out_utf8(std::u8string& out) const;
 
-  // TODO ...
-  Log::debug(u8"Hello ääää€ World!"s + u8"😀 Hello 😀");
+private:
+  const std::codecvt<char32_t, char8_t, std::mbstate_t>& cvt_utf8;
 
-  Params::get();
+  void _cvt_in_utf8(const std::u8string& in);
+  void _cvt_out_utf8(std::u8string& out) const;
+};
 
-  /* -------------------------------------------------------------  */
-
-  Params::release();
-
-  MUNTRACE();
-  return EXIT_SUCCESS;
-}
+};
 
 /* ***************************************************************  */
+
+#endif /* USTR_HPP__  */

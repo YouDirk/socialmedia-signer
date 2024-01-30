@@ -23,30 +23,50 @@
 /* ***************************************************************  */
 
 #ifdef DEBUG
-void socialmedia_signer::Log::debug(const u8str& msg)
+void
+socialmedia_signer::Log::debug(const ustr& msg)
 {
-  std::clog << "DEBUG: " << (const char*) msg.data() << "\n";
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::clog << "DEBUG: " << (const char*) buf.data() << "\n";
 }
 #endif
 
-void socialmedia_signer::Log::info(const u8str& msg)
+void
+socialmedia_signer::Log::info(const ustr& msg)
 {
-  std::clog << "info: " << (const char*) msg.data() << "\n";
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::clog << "info: " << (const char*) buf.data() << "\n";
 }
 
-void socialmedia_signer::Log::warn(const u8str& msg)
+void
+socialmedia_signer::Log::warn(const ustr& msg)
 {
-  std::clog << "Warning: " << (const char*) msg.data() << "\n";
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::clog << "Warning: " << (const char*) buf.data() << "\n";
 }
 
-void socialmedia_signer::Log::error(const u8str& msg)
+void
+socialmedia_signer::Log::error(const ustr& msg)
 {
-  std::clog << "ERROR: " << (const char*) msg.data() << "\n";
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::clog << "ERROR: " << (const char*) buf.data() << "\n";
 }
 
-void socialmedia_signer::Log::fatal(const u8str& msg, int exit_code)
+void
+socialmedia_signer::Log::fatal(const ustr& msg, int exit_code)
 {
-  std::clog << "FATAL: " << (const char*) msg.data() << "\n";
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::clog << "FATAL: " << (const char*) buf.data() << "\n";
 
   exit(exit_code);
 }

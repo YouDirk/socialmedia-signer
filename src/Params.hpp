@@ -21,11 +21,12 @@
 
 #include "common.hpp"
 
-namespace socialmedia_signer {
-
 /* ***************************************************************  */
 
-class Params {
+namespace socialmedia_signer {
+
+class Params
+{
 public:
   /* Singleton class  */
   static void init(int argc, const char** argv);
@@ -40,8 +41,8 @@ private:
   static Params* instance;
 };
 
-/* ***************************************************************  */
-
 };
+
+/* ***************************************************************  */
 
 #endif /* PARAMS_HPP__  */

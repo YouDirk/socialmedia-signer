@@ -21,11 +21,12 @@
 
 #include "common.hpp"
 
-namespace socialmedia_signer {
-
 /* ***************************************************************  */
 
-class Log {
+namespace socialmedia_signer {
+
+class Log
+{
 public:
   /* Abstract class  */
   Log()           = delete;
@@ -33,20 +34,20 @@ public:
   virtual ~Log()  = 0;
 
 #ifdef DEBUG
-  static void debug(const u8str& msg);
+  static void debug(const ustr& msg);
 #else
-  static void debug(const u8str& msg) {};
+  static void debug([[maybe_unused]] const u8str& msg) {};
 #endif
 
-  static void info(const u8str& msg);
-  static void warn(const u8str& msg);
-  static void error(const u8str& msg);
+  static void info(const ustr& msg);
+  static void warn(const ustr& msg);
+  static void error(const ustr& msg);
 
-  static void fatal(const u8str& msg, int exit_code = 0xff);
+  static void fatal(const ustr& msg, int exit_code = 0xff);
+};
+
 };
 
 /* ***************************************************************  */
-
-};
 
 #endif /* LOG_HPP__  */

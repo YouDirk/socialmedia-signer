@@ -16,6 +16,6 @@
 
 
 OUTPUT := socialmedia-signer
-OBJ := Log Params main
+OBJ := ustr Log Params main
 
 include ../makeinc/makefile.inc.mk

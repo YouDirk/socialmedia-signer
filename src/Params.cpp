@@ -30,7 +30,9 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
   const char8_t** u8argv = (const char8_t**) argv;
 
   // TODO: Own u8str class which are including conversions
-  Log::debug((char8_t*) std::to_string(argc).data());
+  const ustr test = u8"😀2😀4€67";
+  Log::debug((char8_t*) std::to_string(test.length()).data());
+  Log::debug(test[2]);
 }
 
 socialmedia_signer::Params::~Params()
@@ -38,25 +40,28 @@ socialmedia_signer::Params::~Params()
   // TODO
 }
 
-void socialmedia_signer::Params::init(int argc, const char** argv)
+void
+socialmedia_signer::Params::init(int argc, const char** argv)
 {
-  if (instance != nullptr)
+  if (Params::instance != nullptr)
     Log::fatal(u8"Command line parameters double parsed!");
 
-  instance = new Params(argc, argv);
+  Params::instance = new Params(argc, argv);
 }
 
-void socialmedia_signer::Params::release()
+void
+socialmedia_signer::Params::release()
 {
-  delete instance;
+  delete Params::instance;
 }
 
-socialmedia_signer::Params* socialmedia_signer::Params::get()
+socialmedia_signer::Params*
+socialmedia_signer::Params::get()
 {
-  if (instance == nullptr)
+  if (Params::instance == nullptr)
     Log::fatal(u8"Command line parameters not parsed!");
 
-  return instance;
+  return Params::instance;
 }
 
 /* ***************************************************************  */
