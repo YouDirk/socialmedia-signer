@@ -24,7 +24,7 @@ socialmedia_signer::Params* socialmedia_signer::Params::instance \
   = nullptr;
 
 /* ***************************************************************  */
-
+#include <format>
 socialmedia_signer::Params::Params(int argc, const char** argv)
 {
   const char8_t** u8argv = (const char8_t**) argv;
@@ -32,7 +32,11 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
   // TODO: Own u8str class which are including conversions
   const ustr test = u8"😀2😀4€67";
   Log::debug((char8_t*) std::to_string(test.length()).data());
-  Log::debug(test[2]);
+  Log::debug(test[2] + (ustr) test[4]);
+
+  ustr x = ustr::format("Hello {} {:0>6}", 5, 5.7);
+
+  Log::debug(x);
 }
 
 socialmedia_signer::Params::~Params()

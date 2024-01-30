@@ -21,6 +21,7 @@
 
 #include <string>
 #include <codecvt>
+#include <format>
 
 using namespace std::string_literals;
 
@@ -40,12 +41,39 @@ public:
 
   void out_utf8(std::u8string& out) const;
 
+  template<typename... Args> inline static ustr
+    format(const std::format_string<Args...> fmt, Args&&... args)
+  {
+    ustr result = (char8_t*)
+      std::vformat(fmt.get(), std::make_format_args(args...)).data();
+
+    return result;
+  }
+
 private:
   const std::codecvt<char32_t, char8_t, std::mbstate_t>& cvt_utf8;
 
   void _cvt_in_utf8(const std::u8string& in);
   void _cvt_out_utf8(std::u8string& out) const;
 };
+
+/* ---------------------------------------------------------------  */
+
+ustr operator+(const ustr& lhs, const char8_t* rhs);
+ustr operator+(const ustr& lhs, const std::u8string& rhs);
+ustr operator+(const char8_t* lhs, const ustr& rhs);
+ustr operator+(const std::u8string& lhs, const ustr& rhs);
+
+  // TODO: Formatter for USTR as argument in FORMAT.
+  /*
+template<> struct std::formatter<ustr, char> {
+  template<class ParseContext> constexpr ParseContext::iterator
+    parse(ParseContext& ctx);
+
+  template<class FmtContext> FmtContext::iterator
+    format(QuotableString s, FmtContext& ctx) const;
+};
+  */
 
 };
 

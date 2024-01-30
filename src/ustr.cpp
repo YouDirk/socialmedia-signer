@@ -48,7 +48,7 @@ socialmedia_signer::ustr::_cvt_out_utf8(std::u8string& out) const
   const char32_t* in_next;
   char8_t* out_next;
 
-  out.resize(this->length() * this->cvt_utf8.max_length(), U'\0');
+  out.resize(this->length() * this->cvt_utf8.max_length(), u8'\0');
 
   this->cvt_utf8.out(mb, &(*this)[0], &(*this)[this->length()], in_next,
                      &out[0], &out[out.length()], out_next);
@@ -97,5 +97,32 @@ socialmedia_signer::ustr::out_utf8(std::u8string& out) const
 {
   this->_cvt_out_utf8(out);
 }
+
+/* ***************************************************************  */
+
+socialmedia_signer::ustr
+socialmedia_signer::operator+(const ustr& lhs, const char8_t* rhs)
+{
+  return lhs + (ustr) rhs;
+}
+
+socialmedia_signer::ustr
+socialmedia_signer::operator+(const ustr& lhs, const std::u8string& rhs)
+{
+  return lhs + (ustr) rhs;
+}
+
+socialmedia_signer::ustr
+socialmedia_signer::operator+(const char8_t* lhs, const ustr& rhs)
+{
+  return (ustr) lhs + rhs;
+}
+
+socialmedia_signer::ustr
+socialmedia_signer::operator+(const std::u8string& lhs, const ustr& rhs)
+{
+  return (ustr) lhs + rhs;
+}
+
 
 /* ***************************************************************  */

@@ -36,7 +36,7 @@ public:
 #ifdef DEBUG
   static void debug(const ustr& msg);
 #else
-  static void debug([[maybe_unused]] const u8str& msg) {};
+  static void debug([[maybe_unused]] const ustr& msg) {};
 #endif
 
   static void info(const ustr& msg);
