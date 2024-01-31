@@ -27,14 +27,26 @@ using namespace socialmedia_signer;
 int
 main(int argc, const char** argv)
 {
-  MTRACE();
+  MTRACE(); {
 
   Params::init(argc, argv);
 
   /* -------------------------------------------------------------  */
 
   // TODO ...
-  Log::debug(u8"Hello ääää€ World!"s + u8"😀 Hello 😀");
+  Log::debug(u8"Hello 💗 ääää€ 💗 World!"s + u8"😀 Hello 😀");
+
+  // TODO: Own u8str class which are including conversions
+  const ustr test = u8"😀1😀3€56";
+  Log::debug((char8_t*) std::to_string(test.length()).data());
+  Log::debug(test[2] + (ustr) test[4]);
+
+  Log::debug(ustr::format("Hello {} {:0>6} {:.^50}",
+                          5, 5.7, test + u8"💗äöüß💗"));
+  Log::debug(test.substr(2, 3));
+  Log::debug(ustr::format("First € found at {}.", test.find(u8"€")));
+  Log::debug(ustr::format("Second {} found at {}.",
+                          test[0], test.find(test[0], 1)));
 
   Params::get();
 
@@ -42,7 +54,7 @@ main(int argc, const char** argv)
 
   Params::release();
 
-  MUNTRACE();
+  } MUNTRACE();
   return EXIT_SUCCESS;
 }
 

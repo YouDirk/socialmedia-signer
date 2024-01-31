@@ -32,12 +32,12 @@ socialmedia_signer::ustr::_cvt_in_utf8(const std::u8string& in)
   const char8_t* in_next;
   char32_t* out_next;
 
-  this->resize(in.length(), U'\0');
+  std::u32string::resize(in.length(), U'\0');
 
   this->cvt_utf8.in(mb, &in[0], &in[in.length()], in_next,
                     &(*this)[0], &(*this)[this->length()], out_next);
 
-  this->resize(out_next - &(*this)[0]);
+  std::u32string::resize(out_next - &(*this)[0]);
 }
 
 void
@@ -86,8 +86,8 @@ socialmedia_signer::ustr::ustr(const std::u32string& msg)
                            char8_t, std::mbstate_t>>(ustr_locale_utf8))
 {}
 
-socialmedia_signer::ustr::ustr(const char32_t msg)
-  :std::u32string(&msg, 1),
+socialmedia_signer::ustr::ustr(const char32_t ch)
+  :std::u32string(&ch, 1),
    cvt_utf8(std::use_facet<std::codecvt<char32_t,
                            char8_t, std::mbstate_t>>(ustr_locale_utf8))
 {}
@@ -96,6 +96,13 @@ void
 socialmedia_signer::ustr::out_utf8(std::u8string& out) const
 {
   this->_cvt_out_utf8(out);
+}
+
+socialmedia_signer::ustr::size_type
+socialmedia_signer::ustr::find(const ustr& str, size_type pos)
+  const noexcept
+{
+  return std::u32string::find(str, pos);
 }
 
 /* ***************************************************************  */
