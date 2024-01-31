@@ -21,6 +21,8 @@
 
 #include "common.hpp"
 
+#include <vector>
+
 /* ***************************************************************  */
 
 namespace socialmedia_signer {
@@ -32,13 +34,36 @@ public:
   static void init(int argc, const char** argv);
   static void release();
 
+  /* Get instance of singleton  */
   static Params* get();
+
+  void print_version();
+  void print_help();
 
 private:
   explicit Params(int argc, const char** argv);
   virtual ~Params();
 
   static Params* instance;
+
+  /* -------------------------------------------------------------  */
+
+  struct _ParamEntry {
+    _ParamEntry(ustr name, char32_t abbr,
+                std::vector<ustr> values,
+                ustr description);
+
+    ustr name; char32_t abbr;
+    std::vector<ustr> values;
+    ustr description;
+
+    bool set;
+    ustr set_value;
+  };
+
+  static std::vector<_ParamEntry> params;
+
+  /* -------------------------------------------------------------  */
 };
 
 };

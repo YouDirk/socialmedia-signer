@@ -92,6 +92,45 @@ socialmedia_signer::ustr::ustr(const char32_t ch)
                            char8_t, std::mbstate_t>>(ustr_locale_utf8))
 {}
 
+/* ---------------------------------------------------------------  */
+
+socialmedia_signer::ustr&
+socialmedia_signer::ustr::operator=(const char8_t* msg)
+{
+  this->_cvt_in_utf8(msg);
+  return *this;
+}
+
+socialmedia_signer::ustr&
+socialmedia_signer::ustr::operator=(const std::u8string& msg)
+{
+  this->_cvt_in_utf8(msg);
+  return *this;
+}
+
+socialmedia_signer::ustr&
+socialmedia_signer::ustr::operator=(const char32_t* msg)
+{
+  std::u32string::assign(msg);
+  return *this;
+}
+
+socialmedia_signer::ustr&
+socialmedia_signer::ustr::operator=(const std::u32string& msg)
+{
+  std::u32string::assign(msg);
+  return *this;
+}
+
+socialmedia_signer::ustr&
+socialmedia_signer::ustr::operator=(const char32_t ch)
+{
+  std::u32string::assign(1, ch);
+  return *this;
+}
+
+/* ---------------------------------------------------------------  */
+
 void
 socialmedia_signer::ustr::out_utf8(std::u8string& out) const
 {
@@ -99,10 +138,10 @@ socialmedia_signer::ustr::out_utf8(std::u8string& out) const
 }
 
 socialmedia_signer::ustr::size_type
-socialmedia_signer::ustr::find(const ustr& str, size_type pos)
+socialmedia_signer::ustr::find(const ustr& msg, size_type pos)
   const noexcept
 {
-  return std::u32string::find(str, pos);
+  return std::u32string::find(msg, pos);
 }
 
 /* ***************************************************************  */
@@ -130,6 +169,5 @@ socialmedia_signer::operator+(const std::u8string& lhs, const ustr& rhs)
 {
   return (ustr) lhs + rhs;
 }
-
 
 /* ***************************************************************  */

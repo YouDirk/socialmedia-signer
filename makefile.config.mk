@@ -25,6 +25,6 @@ DEBUG               := 1
 # See 'Semantic Versioning 2.0.0' for more details.
 #
 # Will be overridden by CI/CD.
-VERSION             := 0.1.0-dev
+CONFIG_VERSION      := 0.1.0-dev
 
 # ********************************************************************

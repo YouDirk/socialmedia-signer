@@ -36,10 +36,10 @@ namespace socialmedia_signer {
  *  2. or std::u8string            u8"💗 😀 Hello World! 😀 💗"s
  *
  * The socialmedia_signer::ustr then internally is working with UTF-32
- * charakters.  Therefore, the access to an character using
+ * characters.  Therefore, the access to an character using
  * operator[]() has nearly no time to run.
  *
- * For output to GUI, console or file this:
+ * For output to GUI, console or file use this:
  *
  * ```c++
  *
@@ -65,9 +65,16 @@ public:
   ustr(const std::u32string& msg);
   ustr(const char32_t ch);
 
+  ustr& operator=(const char8_t* msg);
+  ustr& operator=(const std::u8string& msg);
+
+  ustr& operator=(const char32_t* msg);
+  ustr& operator=(const std::u32string& msg);
+  ustr& operator=(const char32_t ch);
+
   void out_utf8(std::u8string& out) const;
 
-  size_type find(const ustr& str, size_type pos = 0) const noexcept;
+  size_type find(const ustr& msg, size_type pos = 0) const noexcept;
 
   template<typename... Args> inline static ustr
     format(const std::format_string<Args...> fmt, Args&&... args)

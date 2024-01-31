@@ -22,6 +22,32 @@
 
 /* ***************************************************************  */
 
+void
+socialmedia_signer::Log::print(const ustr& msg)
+{
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::cout << reinterpret_cast<const char*>(buf.data());
+}
+
+void
+socialmedia_signer::Log::println(const ustr& msg)
+{
+  std::u8string buf;
+  msg.out_utf8(buf);
+
+  std::cout << reinterpret_cast<const char*>(buf.data()) << "\n";
+}
+
+void
+socialmedia_signer::Log::println()
+{
+  std::cout << "\n";
+}
+
+/* ***************************************************************  */
+
 #ifdef DEBUG
 void
 socialmedia_signer::Log::debug(const ustr& msg)

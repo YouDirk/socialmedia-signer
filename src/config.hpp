@@ -16,47 +16,14 @@
  */
 
 
-#ifndef LOG_HPP__
-#define LOG_HPP__
-
-#include "common.hpp"
+#ifndef CONFIG_HPP__
+#define CONFIG_HPP__
 
 /* ***************************************************************  */
 
-namespace socialmedia_signer {
-
-class Log
-{
-public:
-  /* Abstract class  */
-  Log()           = delete;
-  Log(Log& other) = delete;
-  virtual ~Log()  = 0;
-
-  /* -------------------------------------------------------------  */
-
-  static void print(const ustr& msg);
-
-  static void println(const ustr& msg);
-  static void println();
-
-  /* -------------------------------------------------------------  */
-
-#ifdef DEBUG
-  static void debug(const ustr& msg);
-#else
-  static void debug([[maybe_unused]] const ustr& msg) {};
-#endif
-
-  static void info(const ustr& msg);
-  static void warn(const ustr& msg);
-  static void error(const ustr& msg);
-
-  static void fatal(const ustr& msg, int exit_code = 0xff);
-};
-
-};
+#define CONFIG_BUGTRACKING_URL \
+  u8"https://github.com/YouDirk/socialmedia-signer/issues"
 
 /* ***************************************************************  */
 
-#endif /* LOG_HPP__  */
+#endif /* CONFIG_HPP__  */
