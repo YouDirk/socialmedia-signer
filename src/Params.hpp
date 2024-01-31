@@ -61,7 +61,7 @@ private:
     ustr set_value;
   };
 
-  static std::vector<_ParamEntry> params;
+  static std::vector<_ParamEntry> param_rules;
 
   /* -------------------------------------------------------------  */
 };

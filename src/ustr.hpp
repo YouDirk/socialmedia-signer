@@ -98,8 +98,11 @@ private:
 
   ustr operator+(const ustr& lhs, const char8_t* rhs);
   ustr operator+(const ustr& lhs, const std::u8string& rhs);
+  ustr operator+(const ustr& lhs, const char32_t rhs);
+
   ustr operator+(const char8_t* lhs, const ustr& rhs);
   ustr operator+(const std::u8string& lhs, const ustr& rhs);
+  ustr operator+(const char32_t lhs, const ustr& rhs);
 
 }; /* namespace socialmedia_signer  */
 

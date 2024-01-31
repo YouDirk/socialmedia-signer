@@ -159,6 +159,12 @@ socialmedia_signer::operator+(const ustr& lhs, const std::u8string& rhs)
 }
 
 socialmedia_signer::ustr
+socialmedia_signer::operator+(const ustr& lhs, const char32_t rhs)
+{
+  return lhs + (ustr) rhs;
+}
+
+socialmedia_signer::ustr
 socialmedia_signer::operator+(const char8_t* lhs, const ustr& rhs)
 {
   return (ustr) lhs + rhs;
@@ -166,6 +172,12 @@ socialmedia_signer::operator+(const char8_t* lhs, const ustr& rhs)
 
 socialmedia_signer::ustr
 socialmedia_signer::operator+(const std::u8string& lhs, const ustr& rhs)
+{
+  return (ustr) lhs + rhs;
+}
+
+socialmedia_signer::ustr
+socialmedia_signer::operator+(const char32_t lhs, const ustr& rhs)
 {
   return (ustr) lhs + rhs;
 }

@@ -28,7 +28,7 @@ socialmedia_signer::Params::_ParamEntry::_ParamEntry(
 {}
 
 std::vector<socialmedia_signer::Params::_ParamEntry>
-socialmedia_signer::Params::params = {
+socialmedia_signer::Params::param_rules = {
   _ParamEntry(u8"help", U'h',
               {},
               u8"display this help and exit"),
@@ -44,14 +44,18 @@ socialmedia_signer::Params* socialmedia_signer::Params::instance \
 
 socialmedia_signer::Params::Params(int argc, const char** argv)
 {
-  const char8_t** u8argv = (const char8_t**) argv;
+  [[maybe_unused]] const char8_t** u8argv = (const char8_t**) argv;
+  [[maybe_unused]] int dummy = argc;
 
-  // TODO
+  // TODO: 1. Genarate a std::MAP of commandline parameters, without
+  //          checking commandline rules.
+  //
+  // TODO: 2. Iterate throuh Params::param_rules and check if these
+  //          were satisfied by user.  Otherswise exit with an error.
 }
 
 socialmedia_signer::Params::~Params()
 {
-  // TODO
 }
 
 void
@@ -61,6 +65,10 @@ socialmedia_signer::Params::init(int argc, const char** argv)
     Log::fatal(u8"Command line parameters double parsed!");
 
   Params::instance = new Params(argc, argv);
+
+  // TODO: Apply --help or --version if they was applied by user via
+  //       command line and exit with success.  Otherwise regular
+  //       control flow.
 }
 
 void
@@ -101,18 +109,20 @@ socialmedia_signer::Params::print_help()
   Log::println(
           u8"Sign your social media posts and verify other posts.\n");
 
-  for(_ParamEntry entry: Params::params) {
+  for(_ParamEntry entry: Params::param_rules) {
     Log::println(
       ustr::format("  -{}, --{: <20} {}",
                    entry.abbr,
                    entry.name, entry.description));
+
+    // TODO: Iterate through entry.values
 
 #ifdef DEBUG
     Log::println(
       ustr::format(" {: >27} {} {}",
         u8"debug:", entry.set? u8"[X]": u8"[ ]",
         entry.set && !entry.set_value.empty()?
-          (u8"=" + entry.set_value): u8'\0'));
+          (u8'=' + entry.set_value): u8'\0'));
 #endif
   }
 
