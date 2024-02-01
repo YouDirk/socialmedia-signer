@@ -21,6 +21,7 @@
 
 #include "common.hpp"
 
+#include <map>
 #include <vector>
 
 /* ***************************************************************  */
@@ -37,13 +38,20 @@ public:
   /* Get instance of singleton  */
   static Params* get();
 
-  virtual void print_version();
-  virtual void print_help();
+  virtual void print_version() const;
+  virtual void print_help() const;
 
-  virtual void get_command_name(ustr& command_name);
+  virtual void get_command_name(ustr& command_name) const;
 
 protected:
   virtual bool parse_argv0(ustr& out, const ustr& argv0) const;
+  virtual bool parse_argv(std::map<ustr, ustr>& parsed_name,
+    std::map<ustr, ustr>& parsed_abbr, ustr& argv_next, const ustr& argv)
+    const;
+  virtual bool parse_name(std::map<ustr, ustr>& parsed_name,
+    ustr& argv_next, const ustr& argv) const;
+  virtual bool parse_abbr(std::map<ustr, ustr>& parsed_abbr,
+    ustr& argv_next, const ustr& argv) const;
 
 private:
   explicit Params(int argc, const char** argv);
@@ -52,6 +60,8 @@ private:
   static Params* instance;
 
   ustr command_name;
+
+  bool _print_parse_error(const ustr& msg) const;
 
   /* -------------------------------------------------------------  */
 

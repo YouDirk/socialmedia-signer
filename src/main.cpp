@@ -35,14 +35,14 @@ main(int argc, const char** argv)
 
   Params* params = Params::get();
 
-  ustr command;
-  params->get_command_name(command);
+  ustr cmd_name;
+  params->get_command_name(cmd_name);
 
 #ifdef CONFIG_GUI
   Log::warn(u8"Not implemented -- GUI should run now.");
 #else
   params->print_version();
-  Log::println(ustr::format("\n  Usage: {} --help\n", command));
+  Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
 #endif
 
   /* -------------------------------------------------------------  */

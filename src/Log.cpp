@@ -99,7 +99,7 @@ socialmedia_signer::Log::fatal(const ustr& msg, int exit_code)
   std::clog << "FATAL: "
             << reinterpret_cast<const char*>(buf.data()) << "\n";
 
-  exit(exit_code);
+  std::exit(exit_code);
 }
 
 /* ***************************************************************  */
