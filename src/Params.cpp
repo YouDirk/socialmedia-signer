@@ -44,14 +44,23 @@ socialmedia_signer::Params* socialmedia_signer::Params::instance \
 
 socialmedia_signer::Params::Params(int argc, const char** argv)
 {
-  [[maybe_unused]] const char8_t** u8argv = (const char8_t**) argv;
-  [[maybe_unused]] int dummy = argc;
+  bool success;
 
-  // TODO: 1. Genarate a std::MAP of commandline parameters, without
-  //          checking commandline rules.
-  //
-  // TODO: 2. Iterate throuh Params::param_rules and check if these
-  //          were satisfied by user.  Otherswise exit with an error.
+  if (argc < 1)
+    Log::fatal(u8"Operating system does not provide argv[0]!");
+
+  success = this->parse_argv0(this->command_name,
+                           reinterpret_cast<const char8_t*>(argv[0]));
+  if (!success)
+    Log::fatal(u8"Could not parse argv[0]!");
+
+  /* --------------------  */
+
+  for (int i=1; i<argc; i++) {
+    Log::debug(ustr::format("TODO: parse '{}'", argv[i]));
+  }
+
+  /* --------------------  */
 }
 
 socialmedia_signer::Params::~Params()
@@ -89,17 +98,25 @@ socialmedia_signer::Params::get()
 void
 socialmedia_signer::Params::print_version()
 {
+  Log::print(COMMON_APP_NAME);
+
+#ifdef CONFIG_GUI
+  Log::print(u8" (GUI)");
+#else
+  Log::print(u8" (command-line)");
+#endif
+
 #ifdef CONFIG_VERSION
-  Log::print(u8"Socialmedia Signer version " CONFIG_VERSION);
+  Log::print(u8" version " CONFIG_VERSION);
 #else
 #  error "Missing -DCONFIG_VERSION flag in C++ compiler call!"
 #endif
+
 #ifdef DEBUG
   Log::print(u8" +debug");
 #endif
-  Log::println(u8'\n');
 
-  Log::println(u8"Report bugs to " CONFIG_BUGTRACKING_URL);
+  Log::println(u8"\n\nReport bugs to " COMMON_BUGTRACKING_URL);
 }
 
 void
@@ -128,6 +145,36 @@ socialmedia_signer::Params::print_help()
 
   Log::println();
   this->print_version();
+}
+
+/* ***************************************************************  */
+
+void
+socialmedia_signer::Params::get_command_name(ustr& command_name)
+{
+  command_name = this->command_name;
+}
+
+/* ***************************************************************  */
+
+bool
+socialmedia_signer::Params::parse_argv0(ustr& out, const ustr& argv0)
+  const
+{
+  if (argv0.empty()) {
+    Log::error(u8"argv[0] is empty!");
+    return false;
+  }
+
+  int i_start = argv0.length();
+  for(std::reverse_iterator it = argv0.rbegin();
+      it != argv0.rend() || i_start == 0; it++, i_start--) {
+    if (*it == u8'/' || *it == u8'\\') break;
+  }
+
+  out = argv0.substr(i_start, argv0.length());
+
+  return true;
 }
 
 /* ***************************************************************  */

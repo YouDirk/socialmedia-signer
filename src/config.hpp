@@ -21,8 +21,8 @@
 
 /* ***************************************************************  */
 
-#define CONFIG_BUGTRACKING_URL \
-  u8"https://github.com/YouDirk/socialmedia-signer/issues"
+/* Things like URLs of platforms will be defined here.
+ */
 
 /* ***************************************************************  */
 

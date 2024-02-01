@@ -27,8 +27,8 @@ using namespace std::string_literals;
 
 namespace socialmedia_signer {
 
-/* *******************************************************************
- *
+/* ***************************************************************  */
+/**
  * Fully Unicode+UTF-8 supported string.  For UTF-8 input in the
  * sources use the string literals:
  *
@@ -58,12 +58,20 @@ namespace socialmedia_signer {
 class ustr: public std::u32string
 {
 public:
+  ustr();
+
+  /* copy constructor  */
+  ustr(const ustr& msg);
+
   ustr(const char8_t* msg);
   ustr(const std::u8string& msg);
 
   ustr(const char32_t* msg);
   ustr(const std::u32string& msg);
   ustr(const char32_t ch);
+
+  /* copy assignment  */
+  ustr& operator=(const ustr& msg);
 
   ustr& operator=(const char8_t* msg);
   ustr& operator=(const std::u8string& msg);

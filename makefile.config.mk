@@ -27,4 +27,11 @@ DEBUG               := 1
 # Will be overridden by CI/CD.
 CONFIG_VERSION      := 0.1.0-dev
 
+# --------------------------------------------------------------------
+
+# Compile to GUI version or to command-line tool?
+#
+# Possible values: [1, 0], default: 1
+CONFIG_GUI          := 0
+
 # ********************************************************************

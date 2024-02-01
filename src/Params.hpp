@@ -37,14 +37,21 @@ public:
   /* Get instance of singleton  */
   static Params* get();
 
-  void print_version();
-  void print_help();
+  virtual void print_version();
+  virtual void print_help();
+
+  virtual void get_command_name(ustr& command_name);
+
+protected:
+  virtual bool parse_argv0(ustr& out, const ustr& argv0) const;
 
 private:
   explicit Params(int argc, const char** argv);
   virtual ~Params();
 
   static Params* instance;
+
+  ustr command_name;
 
   /* -------------------------------------------------------------  */
 

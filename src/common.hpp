@@ -44,4 +44,13 @@
 
 /* ***************************************************************  */
 
+#define COMMON_APP_NAME            u8"Socialmedia Signer"
+#define COMMON_APP_DESC \
+  u8"Sign your social media posts and verify other posts."
+
+#define COMMON_BUGTRACKING_URL \
+  u8"https://github.com/YouDirk/socialmedia-signer/issues"
+
+/* ***************************************************************  */
+
 #endif /* COMMON_HPP__  */

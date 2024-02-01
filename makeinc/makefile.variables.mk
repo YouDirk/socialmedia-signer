@@ -82,6 +82,10 @@ ifneq (0,$(DEBUG))
 else
 endif
 
+ifneq (0,$(CONFIG_GUI))
+  DFLAGS         += -DCONFIG_GUI
+endif
+
 MTRACEFILE     := mtrace.log
 EBROWSEFILE    := BROWSE
 CTAGSFILE      := tags

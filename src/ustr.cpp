@@ -58,6 +58,18 @@ socialmedia_signer::ustr::_cvt_out_utf8(std::u8string& out) const
 
 /* ***************************************************************  */
 
+socialmedia_signer::ustr::ustr()
+  :std::u32string(),
+   cvt_utf8(std::use_facet<std::codecvt<char32_t,
+                           char8_t, std::mbstate_t>>(ustr_locale_utf8))
+{}
+
+socialmedia_signer::ustr::ustr(const ustr& msg)
+  :std::u32string(msg),
+   cvt_utf8(std::use_facet<std::codecvt<char32_t,
+                           char8_t, std::mbstate_t>>(ustr_locale_utf8))
+{}
+
 socialmedia_signer::ustr::ustr(const char8_t* msg)
   :std::u32string(),
    cvt_utf8(std::use_facet<std::codecvt<char32_t,
@@ -93,6 +105,13 @@ socialmedia_signer::ustr::ustr(const char32_t ch)
 {}
 
 /* ---------------------------------------------------------------  */
+
+socialmedia_signer::ustr&
+socialmedia_signer::ustr::operator=(const ustr& msg)
+{
+  std::u32string::assign(msg);
+  return *this;
+}
 
 socialmedia_signer::ustr&
 socialmedia_signer::ustr::operator=(const char8_t* msg)
