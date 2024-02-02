@@ -53,14 +53,17 @@ protected:
    *   <argv>   -> '-' <name> | <abbr>
    *             | {terminate}
    *
-   *   <name>   -> '-' [a-zA-Z0-9]+ <value>
+   *   <name>   -> '-' [?a-zA-Z0-9]{2,} <value>
    *   <value>  -> '=' .* {terminate}
    *             | {terminate}
    *
-   *   <abbr>   -> [a-zA-Z0-9] <abbr>
+   *   <abbr>   -> [?a-zA-Z0-9] <abbr+1>
+   *
+   *   <abbr+1> -> [?a-zA-Z0-9] <abbr+1>
    *             | {terminate} <argv+1>
    *
    *   <argv+1> -> [^-].* {terminate} {clear}
+   *             | [-].* {terminate}
    *             | {terminate}
    *
    * description:
@@ -69,22 +72,27 @@ protected:
    *   'a'          - char literal 'a'
    *   .[regex]+*   - word literal matching regular expression .[regex]+*
    *   {terminate}  - need to be parse End Of String for <argv>
+   *                  means RETURN TRUE in implementation
    *   {clear}      - clear string which was parsed by rule to prevent
    *                  parsing <argv>/<argv+1> twice
    */
 
   virtual bool parse_argv0(ustr& out, const ustr& argv0) const;
   virtual bool parse_argv(std::map<ustr, ustr>& parsed_name,
-    std::map<ustr, ustr>& parsed_abbr, ustr& argv_next, const ustr& argv)
-    const;
+    std::map<char32_t, ustr>& parsed_abbr, ustr& argv_next,
+    const ustr& argv) const;
 
   virtual bool parse_name(std::map<ustr, ustr>& parsed_name,
     const ustr& argv) const;
   virtual bool parse_value(std::map<ustr, ustr>& parsed_name,
     const ustr& param_name, const ustr& argv) const;
 
-  virtual bool parse_abbr(std::map<ustr, ustr>& parsed_abbr,
+  virtual bool parse_abbr(std::map<char32_t, ustr>& parsed_abbr,
     ustr& argv_next, const ustr& argv) const;
+  virtual bool parse_abbr_next(std::map<char32_t, ustr>& parsed_abbr,
+    ustr& argv_next, const ustr& argv) const;
+  virtual bool parse_argv_next(std::map<char32_t, ustr>& parsed_abbr,
+    ustr& argv_next, const char32_t abbr_name) const;
 
   virtual bool print_parse_error(const ustr& msg) const;
 

@@ -55,6 +55,10 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
 {
   bool success;
 
+  /* UARGV: modifiable storage for parsing  */
+  std::vector<ustr> uargv;
+  for (int i=0; i<argc; i++) uargv.push_back((const char8_t*) argv[i]);
+
   /* -----------------------------------------------------------------
    * Parse ARGV[0].
    */
@@ -62,8 +66,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
   if (argc < 1)
     Log::fatal(u8"Operating system does not provide argv[0]!");
 
-  success = this->parse_argv0(Params::command_name,
-                           reinterpret_cast<const char8_t*>(argv[0]));
+  success = this->parse_argv0(Params::command_name, uargv[0]);
   if (!success)
     Log::fatal(u8"Could not parse argv[0]!");
 
@@ -71,18 +74,19 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
    * Parse command-line parameters into PARSED_NAME and PARSED_ABBR.
    */
 
-  std::map<ustr, ustr> parsed_name, parsed_abbr;
+  std::map<ustr, ustr>     parsed_name;
+  std::map<char32_t, ustr> parsed_abbr;
 
-  ustr next;
+  ustr* next;
   for (int i=1; i<argc; i++) {
-    next = i < argc - 1? reinterpret_cast<const char8_t*>(argv[i+1])
-                       : u8"";
+    ustr emptystr = u8"";
+    next = i < argc-1? &uargv[i+1]: &emptystr;
 
-    success = this->parse_argv(parsed_name, parsed_abbr, next,
-                           reinterpret_cast<const char8_t*>(argv[i]));
+    success = this->parse_argv(parsed_name, parsed_abbr, *next, uargv[i]);
     if (!success)
       std::exit(EXIT_FAILURE);
   }
+  /* UARGV modified here, during parsing!  */
 
   // TODO ...
   for (auto [name, value]: parsed_name)
@@ -205,13 +209,13 @@ socialmedia_signer::Params::parse_argv0(ustr& out, const ustr& argv0)
   }
   out = argv0.substr(i_start);
 
-  return true;
+  return true;  /* {terminate}  */
 }
 
 bool
 socialmedia_signer::Params::parse_argv(std::map<ustr, ustr>& parsed_name,
-  std::map<ustr, ustr>& parsed_abbr, ustr& argv_next, const ustr& argv)
-  const
+  std::map<char32_t, ustr>& parsed_abbr, ustr& argv_next,
+  const ustr& argv) const
 {
   if (argv.empty()) return true;
 
@@ -271,11 +275,14 @@ socialmedia_signer::Params::parse_value(std::map<ustr, ustr>& parsed_name,
 
   if (argv.empty()) {
     value = u8"";
+    /* {terminate}  */
   } else if (argv[0] != u8'=') {
     return this->print_parse_error(ustr::format(
       "Garbage '{}' behind --{} !", argv, param_name));
-  } else
+  } else {
     value = argv.substr(1);
+    /* {terminate}  */
+  }
 
   const auto [_, success] = parsed_name.insert({param_name, value});
   if (!success) {
@@ -289,10 +296,61 @@ socialmedia_signer::Params::parse_value(std::map<ustr, ustr>& parsed_name,
 /* ---------------------------------------------------------------  */
 
 bool
-socialmedia_signer::Params::parse_abbr(std::map<ustr, ustr>& parsed_abbr,
-  ustr& argv_next, const ustr& argv) const
+socialmedia_signer::Params::parse_abbr(
+  std::map<char32_t, ustr>& parsed_abbr, ustr& argv_next,
+  const ustr& argv) const
 {
-  Log::debug(u8"******************* abbr");
+  if (argv.empty()) {
+    return this->print_parse_error(ustr::format(
+      "Empty parameter abbrevation '-' !"));
+  }
+
+  return this->parse_abbr_next(parsed_abbr, argv_next, argv);
+}
+
+bool
+socialmedia_signer::Params::parse_abbr_next(
+  std::map<char32_t, ustr>& parsed_abbr, ustr& argv_next,
+  const ustr& argv) const
+{
+  char32_t abbr_name = argv[0];
+  if (!(IS_CHAR_ALPHANUM(abbr_name) || abbr_name == u8'?')) {
+    return this->print_parse_error(ustr::format(
+      "Not a parameter abbrevation -{} !", abbr_name));
+  }
+
+  /* Is last character ?  */
+  if (argv.length() < 2)
+    return this->parse_argv_next(parsed_abbr, argv_next, abbr_name);
+
+  const auto [_, success] = parsed_abbr.insert({abbr_name, u8""});
+  if (!success) {
+    return this->print_parse_error(ustr::format(
+      "Double parameter abbrevation -{} !", abbr_name));
+  }
+
+  return this->parse_abbr_next(parsed_abbr, argv_next, argv.substr(1));
+}
+
+bool
+socialmedia_signer::Params::parse_argv_next(
+  std::map<char32_t, ustr>& parsed_abbr, ustr& argv_next,
+  const char32_t abbr_name) const
+{
+  ustr value;
+
+  if (argv_next.empty() || argv_next[0] == u8'-') {
+    value = u8"";  /* 2x {terminate}  */
+  } else {
+    value = argv_next; /* {terminate}  */
+    argv_next = u8"";  /* {clear}  */
+  }
+
+  const auto [_, success] = parsed_abbr.insert({abbr_name, value});
+  if (!success) {
+    return this->print_parse_error(ustr::format(
+      "Double parameter abbrevation -{} !", abbr_name));
+  }
 
   return true;
 }
