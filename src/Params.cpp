@@ -315,8 +315,13 @@ socialmedia_signer::Params::parse_abbr_next(
 {
   char32_t abbr_name = argv[0];
   if (!(IS_CHAR_ALPHANUM(abbr_name) || abbr_name == u8'?')) {
-    return this->print_parse_error(ustr::format(
-      "Not a parameter abbrevation -{} !", abbr_name));
+    if (abbr_name == u8'=')
+      return this->print_parse_error(ustr::format(
+        "Not a parameter abbrevation -example=val !  Did you mean"
+        " '--example=val' or '-e val' ?"));
+    else
+      return this->print_parse_error(ustr::format(
+        "Not a parameter abbrevation -{} !", abbr_name));
   }
 
   /* Is last character ?  */
