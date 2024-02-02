@@ -18,11 +18,16 @@
 
 #include "Params.hpp"
 
-#define IS_CHAR_ALPHANUM(ch)       (((ch) >= u8'a' && (ch) <= u8'z') \
+#define IS_CHAR_ALPHANUM(ch)      ( ((ch) >= u8'a' && (ch) <= u8'z') \
                                  || ((ch) >= u8'A' && (ch) <= u8'Z') \
-                                 || ((ch) >= u8'0' && (ch) <= u8'9'))
+                                 || ((ch) >= u8'0' && (ch) <= u8'9') )
 
 /* ***************************************************************  */
+
+/* Using '_' for debugging purpoeses, should never be printed out.
+ */
+socialmedia_signer::ustr socialmedia_signer::Params::command_name
+  = u8"socialmedia-signer_";
 
 socialmedia_signer::Params::_ParamEntry::_ParamEntry(
   ustr name, char32_t abbr, std::vector<ustr> values,
@@ -33,10 +38,10 @@ socialmedia_signer::Params::_ParamEntry::_ParamEntry(
 
 std::vector<socialmedia_signer::Params::_ParamEntry>
 socialmedia_signer::Params::param_rules = {
-  _ParamEntry(u8"help", U'h',
+  _ParamEntry(u8"help", U'?',
               {},
               u8"display this help and exit"),
-  _ParamEntry(u8"version", U'v',
+  _ParamEntry(u8"version", U'V',
               {},
               u8"output version information and exit")
 };
@@ -47,7 +52,6 @@ socialmedia_signer::Params* socialmedia_signer::Params::instance \
 /* ***************************************************************  */
 
 socialmedia_signer::Params::Params(int argc, const char** argv)
-  :command_name()
 {
   bool success;
 
@@ -58,7 +62,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
   if (argc < 1)
     Log::fatal(u8"Operating system does not provide argv[0]!");
 
-  success = this->parse_argv0(this->command_name,
+  success = this->parse_argv0(Params::command_name,
                            reinterpret_cast<const char8_t*>(argv[0]));
   if (!success)
     Log::fatal(u8"Could not parse argv[0]!");
@@ -82,9 +86,11 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
 
   // TODO ...
   for (auto [name, value]: parsed_name)
-    Log::debug(ustr::format("--{}={}", name, value));
+    Log::debug(ustr::format("Name {} = '{}'",
+                            name, value.empty()? u8"<empty>": value));
   for (auto [abbr, value]: parsed_abbr)
-    Log::debug(ustr::format("-{} {}", abbr, value));
+    Log::debug(ustr::format("Abbr {} = '{}'",
+                            abbr, value.empty()? u8"<empty>": value));
 
   /* -------------------------------------------------------------  */
 }
@@ -176,9 +182,9 @@ socialmedia_signer::Params::print_help() const
 /* ***************************************************************  */
 
 void
-socialmedia_signer::Params::get_command_name(ustr& command_name) const
+socialmedia_signer::Params::get_command_name(ustr& command_name)
 {
-  command_name = this->command_name;
+  command_name = Params::command_name;
 }
 
 /* ***************************************************************  */
@@ -202,31 +208,6 @@ socialmedia_signer::Params::parse_argv0(ustr& out, const ustr& argv0)
   return true;
 }
 
-/* Syntax to parse:
- *
- * <argv>   -> '-' <name> | <abbr>
- *           | {terminate}
- *
- * <name>   -> '-' [a-zA-z0-9]+ <value>
- * <value>  -> '=' .* {terminate}
- *           | {terminate}
- *
- * <abbr>   -> [a-zA-z0-9] <abbr>
- *           | {terminate} <argv+1>
- *
- * <argv+1> -> [^-].* {terminate} {clear}
- *           | {terminate}
- *
- * Description:
- *
- *  <xyz>       - expession xyz
- *  'a'         - char literal 'a'
- *  .[regex]+*  - word literal matching regular expression .[regex]+*
- * {terminate}  - need to be parse End Of String for <argv>
- * {clear}      - clear string which was parsed by rule to prevent
- *                parsing <argv>/<argv+1> twice
- */
-
 bool
 socialmedia_signer::Params::parse_argv(std::map<ustr, ustr>& parsed_name,
   std::map<ustr, ustr>& parsed_abbr, ustr& argv_next, const ustr& argv)
@@ -235,47 +216,77 @@ socialmedia_signer::Params::parse_argv(std::map<ustr, ustr>& parsed_name,
   if (argv.empty()) return true;
 
   if (argv[0] != u8'-' || argv.length() < 2) {
-    return this->_print_parse_error(ustr::format(
-                 "Not a valid parameter '{}'!", argv));
+    return this->print_parse_error(ustr::format(
+                                      "Not a parameter '{}'!", argv));
   }
 
   if (argv[1] == u8'-') {
-    return this->parse_name(parsed_name, argv_next, argv.substr(1));
+    return this->parse_name(parsed_name, argv.substr(1));
   }
 
   return this->parse_abbr(parsed_abbr, argv_next, argv.substr(1));
 }
 
+/* ---------------------------------------------------------------  */
+
 bool
 socialmedia_signer::Params::parse_name(std::map<ustr, ustr>& parsed_name,
-  ustr& argv_next, const ustr& argv) const
+  const ustr& argv) const
 {
-  if (argv.length() < 2) {
-    return this->_print_parse_error(ustr::format(
-                 "Empty parameter name '--' found!", argv));
+  const std::size_t argv_len = argv.length();
+
+  if (argv_len < 1 || argv[0] != u8'-') {
+    return this->print_parse_error(ustr::format(
+                                 "Not a parameter name -{} !", argv));
   }
 
-  if (argv.length() < 3) {
-    return this->_print_parse_error(ustr::format(
-      "Parameter name '-{}' is too short!  Do you mean '{}'"
-      " instead?", argv, argv));
+  unsigned name_len;
+  for (name_len=0; 1+name_len < argv_len; name_len++) {
+    char32_t cur = argv[1+name_len];
+    if (!(IS_CHAR_ALPHANUM(cur) || cur == u8'?')) break;
+  }
+  ustr param_name = argv.substr(1, name_len);
+  const std::size_t param_len = param_name.length();
+
+  if (param_len < 1) {
+    return this->print_parse_error(ustr::format(
+                                      "Empty parameter name '--' !"));
   }
 
-  unsigned i_end;
-  for (i_end=1; i_end < argv.length(); i_end++) {
-    char32_t cur = argv[i_end];
-    if (!IS_CHAR_ALPHANUM(cur)) break;
+  if (param_name.length() < 2) {
+    return this->print_parse_error(ustr::format(
+      "Incomplete parameter name --{} !  Did you mean -{} ?",
+      param_name, param_name));
   }
-  ustr param_name = argv.substr(1, i_end-1);
 
-  const auto [_, success] = parsed_name.insert({param_name, u8""});
+  return this->parse_value(parsed_name, param_name,
+                           argv.substr(1+name_len));
+}
+
+bool
+socialmedia_signer::Params::parse_value(std::map<ustr, ustr>& parsed_name,
+  const ustr& param_name, const ustr& argv) const
+{
+  ustr value;
+
+  if (argv.empty()) {
+    value = u8"";
+  } else if (argv[0] != u8'=') {
+    return this->print_parse_error(ustr::format(
+      "Garbage '{}' behind --{} !", argv, param_name));
+  } else
+    value = argv.substr(1);
+
+  const auto [_, success] = parsed_name.insert({param_name, value});
   if (!success) {
-    return this->_print_parse_error(ustr::format(
-      "Parameter name given twice '--{}'!", param_name));
+    return this->print_parse_error(ustr::format(
+      "Double parameter name --{} !", param_name));
   }
 
   return true;
 }
+
+/* ---------------------------------------------------------------  */
 
 bool
 socialmedia_signer::Params::parse_abbr(std::map<ustr, ustr>& parsed_abbr,
@@ -286,16 +297,16 @@ socialmedia_signer::Params::parse_abbr(std::map<ustr, ustr>& parsed_abbr,
   return true;
 }
 
-/* ***************************************************************  */
+/* ---------------------------------------------------------------  */
 
 bool
-socialmedia_signer::Params::_print_parse_error(const ustr& msg) const
+socialmedia_signer::Params::print_parse_error(const ustr& msg) const
 {
   ustr cmd_name;
-  this->get_command_name(cmd_name);
+  Params::get_command_name(cmd_name);
 
-  ustr out = ustr::format("command-line: {}\n\n  Usage: {} --help\n",
-                          msg, cmd_name);
+  ustr out = ustr::format(
+    "command-line: {}  Try '{} --help' for full help.", msg, cmd_name);
   Log::error(out);
 
   return false;

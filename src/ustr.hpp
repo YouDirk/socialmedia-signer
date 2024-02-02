@@ -71,18 +71,21 @@ public:
   ustr(const char32_t ch);
 
   /* copy assignment  */
-  ustr& operator=(const ustr& msg);
+  virtual ustr& operator=(const ustr& msg);
 
-  ustr& operator=(const char8_t* msg);
-  ustr& operator=(const std::u8string& msg);
+  virtual ustr& operator=(const char8_t* msg);
+  virtual ustr& operator=(const std::u8string& msg);
 
-  ustr& operator=(const char32_t* msg);
-  ustr& operator=(const std::u32string& msg);
-  ustr& operator=(const char32_t ch);
+  virtual ustr& operator=(const char32_t* msg);
+  virtual ustr& operator=(const std::u32string& msg);
+  virtual ustr& operator=(const char32_t ch);
 
-  void out_utf8(std::u8string& out) const;
+  virtual void out_utf8(std::u8string& out) const;
 
-  size_type find(const ustr& msg, size_type pos = 0) const noexcept;
+  virtual size_type find(const ustr& msg, size_type pos=0) const
+    noexcept;
+  virtual ustr substr(size_type pos=0, size_type count=npos)
+    const;
 
   template<typename... Args> inline static ustr
     format(const std::format_string<Args...> fmt, Args&&... args)
@@ -112,7 +115,7 @@ private:
   ustr operator+(const std::u8string& lhs, const ustr& rhs);
   ustr operator+(const char32_t lhs, const ustr& rhs);
 
-}; /* namespace socialmedia_signer  */
+} /* namespace socialmedia_signer  */
 
 /* -------------------------------------------------------------------
  * std::formatter()´s for socialmedia_signer::format().

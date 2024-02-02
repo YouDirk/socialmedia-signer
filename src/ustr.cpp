@@ -163,6 +163,12 @@ socialmedia_signer::ustr::find(const ustr& msg, size_type pos)
   return std::u32string::find(msg, pos);
 }
 
+socialmedia_signer::ustr
+socialmedia_signer::ustr::substr(size_type pos, size_type count) const
+{
+  return std::u32string::substr(pos, count);
+}
+
 /* ***************************************************************  */
 
 socialmedia_signer::ustr

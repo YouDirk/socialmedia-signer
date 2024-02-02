@@ -41,17 +41,52 @@ public:
   virtual void print_version() const;
   virtual void print_help() const;
 
-  virtual void get_command_name(ustr& command_name) const;
+  /* Needs to be static to make it possible that constructor Params()
+   * can print output via class Log.
+   */
+  static void get_command_name(ustr& command_name);
 
 protected:
+
+  /* syntax to parse:
+   *
+   *   <argv>   -> '-' <name> | <abbr>
+   *             | {terminate}
+   *
+   *   <name>   -> '-' [a-zA-Z0-9]+ <value>
+   *   <value>  -> '=' .* {terminate}
+   *             | {terminate}
+   *
+   *   <abbr>   -> [a-zA-Z0-9] <abbr>
+   *             | {terminate} <argv+1>
+   *
+   *   <argv+1> -> [^-].* {terminate} {clear}
+   *             | {terminate}
+   *
+   * description:
+   *
+   *   <xyz>        - expression xyz
+   *   'a'          - char literal 'a'
+   *   .[regex]+*   - word literal matching regular expression .[regex]+*
+   *   {terminate}  - need to be parse End Of String for <argv>
+   *   {clear}      - clear string which was parsed by rule to prevent
+   *                  parsing <argv>/<argv+1> twice
+   */
+
   virtual bool parse_argv0(ustr& out, const ustr& argv0) const;
   virtual bool parse_argv(std::map<ustr, ustr>& parsed_name,
     std::map<ustr, ustr>& parsed_abbr, ustr& argv_next, const ustr& argv)
     const;
+
   virtual bool parse_name(std::map<ustr, ustr>& parsed_name,
-    ustr& argv_next, const ustr& argv) const;
+    const ustr& argv) const;
+  virtual bool parse_value(std::map<ustr, ustr>& parsed_name,
+    const ustr& param_name, const ustr& argv) const;
+
   virtual bool parse_abbr(std::map<ustr, ustr>& parsed_abbr,
     ustr& argv_next, const ustr& argv) const;
+
+  virtual bool print_parse_error(const ustr& msg) const;
 
 private:
   explicit Params(int argc, const char** argv);
@@ -59,9 +94,10 @@ private:
 
   static Params* instance;
 
-  ustr command_name;
-
-  bool _print_parse_error(const ustr& msg) const;
+  /* Needs to be static to make it possible that constructor Params()
+   * can print output via class Log.
+   */
+  static ustr command_name;
 
   /* -------------------------------------------------------------  */
 
@@ -83,7 +119,7 @@ private:
   /* -------------------------------------------------------------  */
 };
 
-};
+}
 
 /* ***************************************************************  */
 

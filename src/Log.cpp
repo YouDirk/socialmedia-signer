@@ -18,6 +18,8 @@
 
 #include "Log.hpp"
 
+#include "Params.hpp"
+
 #include <iostream>
 
 /* ***************************************************************  */
@@ -48,6 +50,18 @@ socialmedia_signer::Log::println()
 
 /* ***************************************************************  */
 
+namespace socialmedia_signer {
+
+static void _prefix(ustr& out, const ustr& level, const ustr& msg)
+{
+  ustr cmd_name;
+  Params::get_command_name(cmd_name);
+
+  out = ustr::format("{}:{}: {}\n", level, cmd_name, msg);
+}
+
+} /* namespace socialmedia_signer  */
+
 #ifdef DEBUG
 void
 socialmedia_signer::Log::debug(const ustr& msg)
@@ -61,43 +75,51 @@ socialmedia_signer::Log::debug(const ustr& msg)
 #endif
 
 void
-socialmedia_signer::Log::info(const ustr& msg)
+socialmedia_signer::Log::note(const ustr& msg)
 {
-  std::u8string buf;
-  msg.out_utf8(buf);
+  ustr out;
+  _prefix(out, u8"note", msg);
 
-  std::clog << "info: "
-            << reinterpret_cast<const char*>(buf.data()) << "\n";
+  std::u8string buf;
+  out.out_utf8(buf);
+
+  std::clog << reinterpret_cast<const char*>(buf.data());
 }
 
 void
 socialmedia_signer::Log::warn(const ustr& msg)
 {
-  std::u8string buf;
-  msg.out_utf8(buf);
+  ustr out;
+  _prefix(out, u8"Warning", msg);
 
-  std::clog << "Warning: "
-            << reinterpret_cast<const char*>(buf.data()) << "\n";
+  std::u8string buf;
+  out.out_utf8(buf);
+
+  std::clog << reinterpret_cast<const char*>(buf.data());
 }
 
 void
 socialmedia_signer::Log::error(const ustr& msg)
 {
-  std::u8string buf;
-  msg.out_utf8(buf);
+  ustr out;
+  _prefix(out, u8"ERROR", msg);
 
-  std::clog << "ERROR: "
-            << reinterpret_cast<const char*>(buf.data()) << "\n";
+  std::u8string buf;
+  out.out_utf8(buf);
+
+  std::clog << reinterpret_cast<const char*>(buf.data());
 }
 
 void
 socialmedia_signer::Log::fatal(const ustr& msg, int exit_code)
 {
-  std::u8string buf;
-  msg.out_utf8(buf);
+  ustr out;
+  _prefix(out, u8"FATAL", msg);
 
-  std::clog << "FATAL: "
-            << reinterpret_cast<const char*>(buf.data()) << "\n";
+  std::u8string buf;
+  out.out_utf8(buf);
+
+  std::clog << reinterpret_cast<const char*>(buf.data());
 
   std::exit(exit_code);
 }

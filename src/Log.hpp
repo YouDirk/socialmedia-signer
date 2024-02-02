@@ -48,14 +48,14 @@ public:
   static void debug([[maybe_unused]] const ustr& msg) {};
 #endif
 
-  static void info(const ustr& msg);
+  static void note(const ustr& msg);
   static void warn(const ustr& msg);
   static void error(const ustr& msg);
 
   static void fatal(const ustr& msg, int exit_code = 0xff);
 };
 
-};
+}
 
 /* ***************************************************************  */
 
