@@ -19,7 +19,7 @@
 #ifndef LOG_HPP__
 #define LOG_HPP__
 
-#include "common.hpp"
+#include "Common.hpp"
 
 /* ***************************************************************  */
 

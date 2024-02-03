@@ -19,10 +19,10 @@
 #ifndef PARAMS_HPP__
 #define PARAMS_HPP__
 
-#include "common.hpp"
+#include "Common.hpp"
 
 #include <map>
-#include <vector>
+#include <forward_list>
 
 /* ***************************************************************  */
 
@@ -47,6 +47,11 @@ public:
   static void get_command_name(ustr& command_name);
 
 protected:
+
+  virtual bool check_and_build(const std::map<ustr, ustr>& parsed_name,
+    const std::map<char32_t, ustr>& parsed_abbr);
+
+  /* -------------------------------------------------------------  */
 
   /* syntax to parse:
    *
@@ -96,6 +101,8 @@ protected:
 
   virtual bool print_parse_error(const ustr& msg) const;
 
+  /* -------------------------------------------------------------  */
+
 private:
   explicit Params(int argc, const char** argv);
   virtual ~Params();
@@ -109,20 +116,38 @@ private:
 
   /* -------------------------------------------------------------  */
 
-  struct _ParamEntry {
-    _ParamEntry(ustr name, char32_t abbr,
-                std::vector<ustr> values,
-                ustr description);
+  struct _Subargument {
+    _Subargument(ustr name, char32_t abbr, ustr description,
+                 ustr value_doc, bool value_allowed,
+                 bool value_emptyallowed);
 
     ustr name; char32_t abbr;
-    std::vector<ustr> values;
     ustr description;
+
+    ustr value_doc;
+    bool value_allowed;
+    bool value_emptyallowed;
 
     bool set;
     ustr set_value;
   };
 
-  static std::vector<_ParamEntry> param_rules;
+  struct _Subcommand: public _Subargument {
+    _Subcommand(ustr name, char32_t abbr, ustr description,
+                ustr value_doc, bool value_allowed,
+                bool value_emptyallowed,
+                std::forward_list<ustr> subarguments);
+
+    /* Required arguments for this subcommand.  */
+    std::forward_list<ustr> subarguments;
+  };
+
+  /* Static memory location for subcommands and -arguments.  */
+  static std::forward_list<_Subargument> subargs;
+  static std::forward_list<_Subcommand>  subcmds;
+
+  std::map<ustr, _Subargument*> subarg_map;
+  std::map<ustr, _Subcommand*>  subcmd_map;
 
   /* -------------------------------------------------------------  */
 };

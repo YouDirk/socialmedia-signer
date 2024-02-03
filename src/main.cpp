@@ -18,7 +18,7 @@
 
 #include "Params.hpp"
 
-#include "common.hpp"
+#include "Common.hpp"
 
 /* ***************************************************************  */
 
@@ -38,19 +38,23 @@ main(int argc, const char** argv)
   ustr cmd_name;
   params->get_command_name(cmd_name);
 
+  if (Common::get_exit_code() < 0) {
 #ifdef CONFIG_GUI
-  Log::warn(u8"Not implemented -- GUI should run now.");
+    Log::warn(u8"Not implemented -- GUI should run now.");
 #else
-  params->print_version();
-  Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
+    params->print_version();
+    Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
 #endif
+  }
 
   /* -------------------------------------------------------------  */
 
   Params::release();
 
   } MUNTRACE();
-  return EXIT_SUCCESS;
+
+  int exit_code = Common::get_exit_code();
+  return exit_code < 0? EXIT_SUCCESS: exit_code;
 }
 
 /* ***************************************************************  */

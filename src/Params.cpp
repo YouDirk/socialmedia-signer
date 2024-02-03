@@ -18,43 +18,72 @@
 
 #include "Params.hpp"
 
+#include <vector>
+
 #define IS_CHAR_ALPHANUM(ch)      ( ((ch) >= u8'a' && (ch) <= u8'z') \
                                  || ((ch) >= u8'A' && (ch) <= u8'Z') \
                                  || ((ch) >= u8'0' && (ch) <= u8'9') )
 
-/* ***************************************************************  */
-
-/* Using '_' for debugging purpoeses, should never be printed out.
+/* *******************************************************************
+ * Static memory location for subcommands and -arguments.
  */
-socialmedia_signer::ustr socialmedia_signer::Params::command_name
-  = u8"socialmedia-signer_";
 
-socialmedia_signer::Params::_ParamEntry::_ParamEntry(
-  ustr name, char32_t abbr, std::vector<ustr> values,
-  ustr description)
-  :name(name), abbr(abbr), values(values), description(description),
-   set(false), set_value(u8"")
-{}
-
-std::vector<socialmedia_signer::Params::_ParamEntry>
-socialmedia_signer::Params::param_rules = {
-  _ParamEntry(u8"help", U'?',
-              {},
-              u8"display this help and exit"),
-  _ParamEntry(u8"version", U'V',
-              {},
-              u8"output version information and exit")
+std::forward_list<socialmedia_signer::Params::_Subargument>
+socialmedia_signer::Params::subargs = {
+  _Subargument(u8"url", u8'u',
+    u8"URL of the post to verify",
+               u8"https://<...>/post/<...>", true, false),
+  _Subargument(u8"image", u8'i',
+    u8"File name of an image to overlay QR signature",
+    u8"path/to/file.jpg", true, false)
 };
 
-socialmedia_signer::Params* socialmedia_signer::Params::instance \
-  = nullptr;
+std::forward_list<socialmedia_signer::Params::_Subcommand>
+socialmedia_signer::Params::subcmds = {
+  _Subcommand(u8"verify", u8'v',
+    u8"display this help and exit",
+    u8"", false, true, {u8"url"}),
+
+  _Subcommand(u8"help", u8'?',
+    u8"display this help and exit",
+    u8"", false, true, {}),
+  _Subcommand(u8"version", u8'V',
+    u8"output version information and exit",
+    u8"", false, true, {})
+};
+
+/* ***************************************************************  */
+
+/* Using '_' for debugging purposes, should never be printed out.
+ */
+socialmedia_signer::ustr
+socialmedia_signer::Params::command_name = u8"socialmedia-signer_";
+
+socialmedia_signer::Params*
+socialmedia_signer::Params::instance = nullptr;
+
+socialmedia_signer::Params::_Subargument::_Subargument(
+  ustr name, char32_t abbr, ustr description, ustr value_doc,
+  bool value_allowed, bool value_emptyallowed)
+  :name(name), abbr(abbr), description(description),
+   value_doc(value_doc), value_allowed(value_allowed),
+   value_emptyallowed(value_emptyallowed), set(false), set_value(u8"")
+{}
+
+socialmedia_signer::Params::_Subcommand::_Subcommand(
+  ustr name, char32_t abbr, ustr description, ustr value_doc,
+  bool value_allowed, bool value_emptyallowed,
+  std::forward_list<ustr> subarguments)
+  :_Subargument(name, abbr, description, value_doc, value_allowed,
+                value_emptyallowed),
+   subarguments(subarguments)
+{}
 
 /* ***************************************************************  */
 
 socialmedia_signer::Params::Params(int argc, const char** argv)
+  :subarg_map(), subcmd_map()
 {
-  bool success;
-
   /* UARGV: modifiable storage for parsing  */
   std::vector<ustr> uargv;
   for (int i=0; i<argc; i++) uargv.push_back((const char8_t*) argv[i]);
@@ -66,8 +95,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
   if (argc < 1)
     Log::fatal(u8"Operating system does not provide argv[0]!");
 
-  success = this->parse_argv0(Params::command_name, uargv[0]);
-  if (!success)
+  if (!this->parse_argv0(Params::command_name, uargv[0]))
     Log::fatal(u8"Could not parse argv[0]!");
 
   /* -----------------------------------------------------------------
@@ -82,19 +110,17 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
     ustr emptystr = u8"";
     next = i < argc-1? &uargv[i+1]: &emptystr;
 
-    success = this->parse_argv(parsed_name, parsed_abbr, *next, uargv[i]);
-    if (!success)
+    if (!this->parse_argv(parsed_name, parsed_abbr, *next, uargv[i]))
       std::exit(EXIT_FAILURE);
   }
   /* UARGV modified here, during parsing!  */
 
-  // TODO ...
-  for (auto [name, value]: parsed_name)
-    Log::debug(ustr::format("Name {} = '{}'",
-                            name, value.empty()? u8"<empty>": value));
-  for (auto [abbr, value]: parsed_abbr)
-    Log::debug(ustr::format("Abbr {} = '{}'",
-                            abbr, value.empty()? u8"<empty>": value));
+  /* -----------------------------------------------------------------
+   * Check parsed parameters and build subcommands and subarguments.
+   */
+
+  if (!this->check_and_build(parsed_name, parsed_abbr))
+    std::exit(EXIT_FAILURE);
 
   /* -------------------------------------------------------------  */
 }
@@ -162,20 +188,19 @@ socialmedia_signer::Params::print_help() const
 {
   Log::println(COMMON_APP_NAME u8"\n\n" COMMON_APP_DESC u8"\n");
 
-  for(_ParamEntry entry: Params::param_rules) {
+  for(_Subcommand scmd: Params::subcmds) {
     Log::println(
       ustr::format("  -{}, --{: <20} {}",
-                   entry.abbr,
-                   entry.name, entry.description));
+                   scmd.abbr, scmd.name, scmd.description));
 
     // TODO: Iterate through entry.values
 
 #ifdef DEBUG
     Log::println(
       ustr::format(" {: >27} {} {}",
-        u8"debug:", entry.set? u8"[X]": u8"[ ]",
-        entry.set && !entry.set_value.empty()?
-          (u8'=' + entry.set_value): u8'\0'));
+                   u8"debug:", scmd.set? u8"[X]": u8"[ ]",
+                   scmd.set && !scmd.set_value.empty()
+                     ? u8'=' + scmd.set_value: u8'\0'));
 #endif
   }
 
@@ -189,6 +214,55 @@ void
 socialmedia_signer::Params::get_command_name(ustr& command_name)
 {
   command_name = Params::command_name;
+}
+
+/* ***************************************************************  */
+
+bool
+socialmedia_signer::Params::check_and_build(
+  const std::map<ustr, ustr>& parsed_name,
+  const std::map<char32_t, ustr>& parsed_abbr)
+{
+  for (_Subargument sarg: Params::subargs) {
+    // TODO: ERASE() instead of FIND() to error unknown subcommands
+    auto name_search = parsed_name.find(sarg.name);
+    auto abbr_search = parsed_abbr.find(sarg.abbr);
+
+    if (name_search != parsed_name.end()) {
+      ustr value = name_search->second;
+
+      sarg.set = true;
+
+      if (!sarg.value_allowed && !value.empty()) {
+        return this->print_parse_error(ustr::format(
+          "--{} value ={} needs to be empty!", sarg.name, value));
+      }
+      if (!sarg.value_emptyallowed && value.empty()) {
+        return this->print_parse_error(ustr::format(
+          "--{}={} a value is required =<value> !", sarg.name,
+          sarg.value_doc));
+      }
+      sarg.set_value = value;
+
+    } else if (abbr_search != parsed_abbr.end()) {
+
+      // TODO
+      sarg.set = true;
+
+    }
+
+    auto [_, success] = this->subarg_map.insert({sarg.name, &sarg});
+    if (!success)
+      Log::fatal(ustr::format(
+                 "Could not build subargument --{}, -{}, '{}'!",
+                 sarg.name, sarg.abbr, sarg.description));
+
+    // TODO
+    Log::debug(ustr::format("--{} -{} = {} '{}'", sarg.name, sarg.abbr,
+      static_cast<ustr>(sarg.set? u8"SET": u8"NOT SET"), sarg.set_value));
+  }
+
+  return true;
 }
 
 /* ***************************************************************  */

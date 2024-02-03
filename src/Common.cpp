@@ -16,41 +16,25 @@
  */
 
 
-#ifndef COMMON_HPP__
-#define COMMON_HPP__
+#include "Common.hpp"
 
 /* ***************************************************************  */
 
-#include "config.hpp"
+int
+socialmedia_signer::Common::exit_code = -1;
 
 /* ***************************************************************  */
 
-#include <stdlib.h>
+void
+socialmedia_signer::Common::set_exit_code(int exit_code)
+{
+  Common::exit_code = exit_code;
+}
 
-#ifdef HAS_MTRACE
-#  include <mcheck.h>
-#  define MTRACE()                 mtrace()
-#  define MUNTRACE()               muntrace()
-#else
-#  define MTRACE()
-#  define MUNTRACE()
-#endif
-
-/* ***************************************************************  */
-
-#include "ustr.hpp"
-
-#include "Log.hpp"
+int
+socialmedia_signer::Common::get_exit_code()
+{
+  return Common::exit_code;
+}
 
 /* ***************************************************************  */
-
-#define COMMON_APP_NAME            u8"Socialmedia Signer"
-#define COMMON_APP_DESC \
-  u8"Sign your social media posts and verify other posts."
-
-#define COMMON_BUGTRACKING_URL \
-  u8"https://github.com/YouDirk/socialmedia-signer/issues"
-
-/* ***************************************************************  */
-
-#endif /* COMMON_HPP__  */
