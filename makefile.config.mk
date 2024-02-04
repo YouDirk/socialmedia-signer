@@ -17,19 +17,20 @@
 
 # ********************************************************************
 
-# Debug build?  Possible values: [1, 0], default: 1
+# Debug build?  Will be overridden by CI/CD.
 #
-# Will be overridden by CI/CD.
+# Possible values: [1, 0], default: 1
 DEBUG               := 1
 
-# See 'Semantic Versioning 2.0.0' for more details.
+# See 'Semantic Versioning 2.0.0' for more details.  Will be
+# overridden by CI/CD.
 #
-# Will be overridden by CI/CD.
 CONFIG_VERSION      := 0.1.0-dev
 
 # --------------------------------------------------------------------
 
-# Compile to GUI version or to command-line tool?
+# Compile to GUI version or to command-line tool?  Will be overridden
+# by CI/CD.
 #
 # Possible values: [1, 0], default: 1
 CONFIG_GUI          := 0

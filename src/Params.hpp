@@ -48,8 +48,8 @@ public:
 
 protected:
 
-  virtual bool check_and_build(const std::map<ustr, ustr>& parsed_name,
-    const std::map<char32_t, ustr>& parsed_abbr);
+  virtual bool check_subcommands(std::map<ustr, ustr>& parsed_name,
+    std::map<char32_t, ustr>& parsed_abbrs);
 
   /* -------------------------------------------------------------  */
 
@@ -82,24 +82,24 @@ protected:
    *                  parsing <argv>/<argv+1> twice
    */
 
-  virtual bool parse_argv0(ustr& out, const ustr& argv0) const;
-  virtual bool parse_argv(std::map<ustr, ustr>& parsed_name,
-    std::map<char32_t, ustr>& parsed_abbr, ustr& argv_next,
+  virtual void parse_argv0(ustr& out, const ustr& argv0) const;
+  virtual bool parse_argv(std::map<ustr, ustr>& parsed_names,
+    std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
     const ustr& argv) const;
 
-  virtual bool parse_name(std::map<ustr, ustr>& parsed_name,
+  virtual bool parse_name(std::map<ustr, ustr>& parsed_names,
     const ustr& argv) const;
-  virtual bool parse_value(std::map<ustr, ustr>& parsed_name,
+  virtual bool parse_value(std::map<ustr, ustr>& parsed_names,
     const ustr& param_name, const ustr& argv) const;
 
-  virtual bool parse_abbr(std::map<char32_t, ustr>& parsed_abbr,
+  virtual bool parse_abbr(std::map<char32_t, ustr>& parsed_abbrs,
     ustr& argv_next, const ustr& argv) const;
-  virtual bool parse_abbr_next(std::map<char32_t, ustr>& parsed_abbr,
+  virtual bool parse_abbr_next(std::map<char32_t, ustr>& parsed_abbrs,
     ustr& argv_next, const ustr& argv) const;
-  virtual bool parse_argv_next(std::map<char32_t, ustr>& parsed_abbr,
+  virtual bool parse_argv_next(std::map<char32_t, ustr>& parsed_abbrs,
     ustr& argv_next, const char32_t abbr_name) const;
 
-  virtual bool print_parse_error(const ustr& msg) const;
+  virtual bool print_error(const ustr& msg) const;
 
   /* -------------------------------------------------------------  */
 
@@ -117,35 +117,36 @@ private:
   /* -------------------------------------------------------------  */
 
   struct _Subargument {
-    _Subargument(ustr name, char32_t abbr, ustr description,
-                 ustr value_doc, bool value_allowed,
-                 bool value_emptyallowed);
+    _Subargument(const ustr name, const char32_t abbr,
+      const ustr description,const ustr value_doc,
+      const bool value_allowed, const bool value_emptyallowed);
 
-    ustr name; char32_t abbr;
-    ustr description;
+    const ustr name; const char32_t abbr;
+    const ustr description;
 
-    ustr value_doc;
-    bool value_allowed;
-    bool value_emptyallowed;
+    const ustr value_doc;
+    const bool value_allowed;
+    const bool value_emptyallowed;
 
     bool set;
     ustr set_value;
   };
 
   struct _Subcommand: public _Subargument {
-    _Subcommand(ustr name, char32_t abbr, ustr description,
-                ustr value_doc, bool value_allowed,
-                bool value_emptyallowed,
-                std::forward_list<ustr> subarguments);
+    _Subcommand(const ustr name, const char32_t abbr,
+      const ustr description, const ustr value_doc,
+      const bool value_allowed, const bool value_emptyallowed,
+      const std::forward_list<ustr> subarguments);
 
     /* Required arguments for this subcommand.  */
-    std::forward_list<ustr> subarguments;
+    const std::forward_list<ustr> subarguments;
   };
 
-  /* Static memory location for subcommands and -arguments.  */
-  static std::forward_list<_Subargument> subargs;
-  static std::forward_list<_Subcommand>  subcmds;
+  /* Memory location of subcommands and -arguments.  */
+  std::forward_list<_Subargument> subargs;
+  std::forward_list<_Subcommand>  subcmds;
 
+  /* Used to lookup the lists above.  */
   std::map<ustr, _Subargument*> subarg_map;
   std::map<ustr, _Subcommand*>  subcmd_map;
 
