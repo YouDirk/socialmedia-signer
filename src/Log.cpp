@@ -54,8 +54,7 @@ namespace socialmedia_signer {
 
 static void _prefix(ustr& out, const ustr& level, const ustr& msg)
 {
-  ustr cmd_name;
-  Params::get_command_name(cmd_name);
+  const ustr& cmd_name = Params::get_command_name();
 
   out = ustr::format("{}:{}: {}\n", level, cmd_name, msg);
 }

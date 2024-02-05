@@ -31,25 +31,8 @@ namespace socialmedia_signer {
 class Params
 {
 public:
-  /* Singleton class  */
-  static void init(int argc, const char** argv);
-  static void release();
-
-  /* Get instance of singleton  */
-  static Params* get();
-
-  virtual void print_version() const;
-  virtual void print_help() const;
-
-  /* Needs to be static to make it possible that constructor Params()
-   * can print output via class Log.
-   */
-  static void get_command_name(ustr& command_name);
-
-protected:
-
-  struct _Subargument {
-    _Subargument(const ustr name, const char32_t abbr,
+  struct Subargument {
+    Subargument(const ustr name, const char32_t abbr,
       const ustr description,const ustr value_doc,
       const bool value_allowed, const bool value_emptyallowed);
 
@@ -64,8 +47,8 @@ protected:
     ustr set_value;
   };
 
-  struct _Subcommand: public _Subargument {
-    _Subcommand(const ustr name, const char32_t abbr,
+  struct Subcommand: public Subargument {
+    Subcommand(const ustr name, const char32_t abbr,
       const ustr description, const ustr value_doc,
       const bool value_allowed, const bool value_emptyallowed,
       const std::forward_list<ustr> subargs_required,
@@ -78,13 +61,37 @@ protected:
 
   /* -------------------------------------------------------------  */
 
+  /* Singleton class  */
+  static void init(int argc, const char** argv);
+  static void release();
+
+  /* Get instance of singleton  */
+  static Params* get();
+
+  /* Needs to be static to make it possible that constructor Params()
+   * can print output via class Log.
+   */
+  static const ustr& get_command_name();
+
+  virtual void print_version() const;
+  virtual void print_help() const;
+
+  virtual const Subcommand* get_subcommand() const;
+  virtual const Subcommand* get_subcommand(const ustr& scmd_str) const;
+  virtual const Subargument* get_subargument(const ustr& sarg_str) const;
+
+  /* -------------------------------------------------------------  */
+protected:
+  virtual const ustr format(const Subargument& subarg, bool abbr=false,
+                            bool optional=false) const;
+
   virtual bool check_parameters(std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs);
   virtual bool check_subcommands(std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs);
   virtual bool check_subaruments(
-    std::forward_list<_Subargument>& subargs,
-    std::map<ustr, _Subargument*>& subarg_map,
+    std::forward_list<Subargument>* subargs,
+    std::map<ustr, Subargument*>* subarg_map,
     std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs) const;
 
@@ -152,12 +159,14 @@ private:
   static ustr command_name;
 
   /* Memory location of subcommands and -arguments.  */
-  std::forward_list<_Subargument> subargs;
-  std::forward_list<_Subcommand>  subcmds;
+  std::forward_list<Subargument> subargs;
+  std::forward_list<Subcommand>  subcmds;
 
   /* Used to lookup the lists above.  */
-  std::map<ustr, _Subargument*> subarg_map;
-  std::map<ustr, _Subcommand*>  subcmd_map;
+  std::map<ustr, Subargument*> subarg_map;
+  std::map<ustr, Subcommand*>  subcmd_map;
+
+  const Subcommand* subcommand;
 
   /* -------------------------------------------------------------  */
 };

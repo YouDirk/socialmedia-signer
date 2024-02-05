@@ -33,18 +33,18 @@ main(int argc, const char** argv)
 
   /* -------------------------------------------------------------  */
 
-  Params* params = Params::get();
-
-  ustr cmd_name;
-  params->get_command_name(cmd_name);
-
   if (Common::get_exit_code() < 0) {
+
 #ifdef CONFIG_GUI
     Log::warn(u8"Not implemented -- GUI should run now.");
 #else
+    Params* params = Params::get();
+    const ustr& cmd_name = params->get_command_name();
+
     params->print_version();
     Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
 #endif
+
   }
 
   /* -------------------------------------------------------------  */
