@@ -49,34 +49,43 @@ socialmedia_signer::Params::_Subcommand::_Subcommand(
   const ustr name, const char32_t abbr, const ustr description,
   const ustr value_doc, const bool value_allowed,
   const bool value_emptyallowed,
-  const std::forward_list<ustr> subarguments)
+  const std::forward_list<ustr> subargs_required,
+  const std::forward_list<ustr> subargs_optional)
   :_Subargument(name, abbr, description, value_doc, value_allowed,
                 value_emptyallowed),
-   subarguments(subarguments)
+   subargs_required(subargs_required),
+   subargs_optional(subargs_optional)
 {}
 
 /* ***************************************************************  */
 
 socialmedia_signer::Params::Params(int argc, const char** argv)
   :subargs({
-     _Subargument(u8"url", u8'u',
-       u8"URL of the post to verify",
-       u8"https://<...>/post/<...>", true, false),
+     _Subargument(u8"text", u8't',
+       u8"text message to sign or verify",
+       u8"<message>", true, false),
      _Subargument(u8"image", u8'i',
-       u8"File name of an image to overlay QR signature",
-       u8"path/to/file.jpg", true, false)
+       u8"filename of an image to overlay the QR signature",
+       u8"<filename>", true, false)
    }),
    subcmds({
+     _Subcommand(u8"sign", u8's',
+       u8"Post a signed message to <platform>",
+       u8"<platform>", true, false,
+       {u8"text"},
+       {u8"image"}),
      _Subcommand(u8"verify", u8'v',
-       u8"verify a post which includes a QR signature",
-       u8"", false, true, {u8"url"}),
+       u8"verify a post at <url> which includes a QR signature",
+       u8"<url>", true, false,
+       {},
+       {}),
 
      _Subcommand(u8"help", u8'?',
        u8"display this help and exit",
-       u8"", false, true, {}),
+       u8"", false, true, {}, {}),
      _Subcommand(u8"version", u8'V',
        u8"output version information and exit",
-       u8"", false, true, {})
+       u8"", false, true, {}, {})
    }), subarg_map(), subcmd_map()
 {
   /* UARGV: modifiable storage for parsing  */
@@ -113,7 +122,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
    * Check parsed parameters and build subcommands and subarguments.
    */
 
-  if (!this->check_subcommands(parsed_names, parsed_abbrs))
+  if (!this->check_parameters(parsed_names, parsed_abbrs))
     std::exit(EXIT_FAILURE);
 
   for (const auto& subarg_search: this->subarg_map) {
@@ -232,11 +241,72 @@ socialmedia_signer::Params::get_command_name(ustr& command_name)
 /* ***************************************************************  */
 
 bool
+socialmedia_signer::Params::check_parameters(
+  std::map<ustr, ustr>& parsed_names,
+  std::map<char32_t, ustr>& parsed_abbrs)
+{
+  if (!this->check_subaruments(this->subargs, this->subarg_map,
+                               parsed_names, parsed_abbrs))
+    return false;
+
+  if (!this->check_subcommands(parsed_names, parsed_abbrs))
+    return false;
+
+  if (!parsed_names.empty()) {
+    return this->print_error(ustr::format(
+      "--{} unknown parameter name !", parsed_names.begin()->first));
+  }
+  if (!parsed_abbrs.empty()) {
+    return this->print_error(ustr::format(
+      "-{} unknown parameter !", parsed_abbrs.begin()->first));
+  }
+
+  return true;
+}
+
+bool
 socialmedia_signer::Params::check_subcommands(
   std::map<ustr, ustr>& parsed_names,
   std::map<char32_t, ustr>& parsed_abbrs)
 {
-  for (_Subargument& sarg: Params::subargs) {
+  if (!this->check_subaruments(
+    reinterpret_cast<std::forward_list<_Subargument>&>(this->subcmds),
+    reinterpret_cast<std::map<ustr, _Subargument*>&>(this->subcmd_map),
+    parsed_names, parsed_abbrs)) return false;
+
+  const _Subcommand* cmd_found = nullptr;
+  for (const _Subcommand& scmd: this->subcmds) {
+    if (!scmd.set) continue;
+
+    if (cmd_found != nullptr) {
+      return this->print_error(ustr::format(
+        "subcommands --{} and --{} set, choose just one please !",
+        cmd_found->name, scmd.name));
+    }
+
+    for (const ustr& sargstr: scmd.subargs_required) {
+      const auto& sarg_search = this->subarg_map.find(sargstr);
+      if (sarg_search != subarg_map.end()
+          && sarg_search->second->set) continue;
+
+      return this->print_error(ustr::format(
+        "subcommand --{} requires --{} set !", scmd.name, sargstr));
+    }
+
+    cmd_found = &scmd;
+  }
+
+  return true;
+}
+
+bool
+socialmedia_signer::Params::check_subaruments(
+  std::forward_list<_Subargument>& subargs,
+  std::map<ustr, _Subargument*>& subarg_map,
+  std::map<ustr, ustr>& parsed_names,
+  std::map<char32_t, ustr>& parsed_abbrs) const
+{
+  for (_Subargument& sarg: subargs) {
     const auto& name_search = parsed_names.find(sarg.name);
     if (name_search != parsed_names.end()) {
       sarg.set = true;
@@ -252,7 +322,7 @@ socialmedia_signer::Params::check_subcommands(
     if (abbr_search != parsed_abbrs.end()) {
       if (sarg.set) {
         return this->print_error(ustr::format(
-          "--{} and -{} given, but just need one of them !", sarg.name,
+          "--{} and -{} given, but just one of them needed !", sarg.name,
           sarg.abbr, sarg.set_value));
       }
 
@@ -276,25 +346,12 @@ socialmedia_signer::Params::check_subcommands(
         sarg.name, sarg.value_doc));
     }
 
-    const auto& [_, success] = this->subarg_map
-                               .insert({sarg.name, &sarg});
+    const auto& [_, success] = subarg_map.insert({sarg.name, &sarg});
     if (!success) {
       Log::fatal(ustr::format(
         "Could not insert subargument --{}, -{}, '{}'!  Double insert?",
         sarg.name, sarg.abbr, sarg.description));
     }
-  }
-
-  /* -------------------------------------------------------------  */
-
-  if (!parsed_names.empty()) {
-    return this->print_error(ustr::format(
-      "--{} unknown parameter name !", parsed_names.begin()->first));
-  }
-  if (!parsed_abbrs.empty()) {
-    return this->print_error(ustr::format(
-      "-{} unknown parameter !",
-      parsed_abbrs.begin()->first));
   }
 
   return true;

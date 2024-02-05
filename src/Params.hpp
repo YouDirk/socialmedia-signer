@@ -48,8 +48,45 @@ public:
 
 protected:
 
-  virtual bool check_subcommands(std::map<ustr, ustr>& parsed_name,
+  struct _Subargument {
+    _Subargument(const ustr name, const char32_t abbr,
+      const ustr description,const ustr value_doc,
+      const bool value_allowed, const bool value_emptyallowed);
+
+    const ustr name; const char32_t abbr;
+    const ustr description;
+
+    const ustr value_doc;
+    const bool value_allowed;
+    const bool value_emptyallowed;
+
+    bool set;
+    ustr set_value;
+  };
+
+  struct _Subcommand: public _Subargument {
+    _Subcommand(const ustr name, const char32_t abbr,
+      const ustr description, const ustr value_doc,
+      const bool value_allowed, const bool value_emptyallowed,
+      const std::forward_list<ustr> subargs_required,
+      const std::forward_list<ustr> subargs_optional);
+
+    /* Required arguments for this subcommand.  */
+    const std::forward_list<ustr> subargs_required;
+    const std::forward_list<ustr> subargs_optional;
+  };
+
+  /* -------------------------------------------------------------  */
+
+  virtual bool check_parameters(std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs);
+  virtual bool check_subcommands(std::map<ustr, ustr>& parsed_names,
+    std::map<char32_t, ustr>& parsed_abbrs);
+  virtual bool check_subaruments(
+    std::forward_list<_Subargument>& subargs,
+    std::map<ustr, _Subargument*>& subarg_map,
+    std::map<ustr, ustr>& parsed_names,
+    std::map<char32_t, ustr>& parsed_abbrs) const;
 
   /* -------------------------------------------------------------  */
 
@@ -113,34 +150,6 @@ private:
    * can print output via class Log.
    */
   static ustr command_name;
-
-  /* -------------------------------------------------------------  */
-
-  struct _Subargument {
-    _Subargument(const ustr name, const char32_t abbr,
-      const ustr description,const ustr value_doc,
-      const bool value_allowed, const bool value_emptyallowed);
-
-    const ustr name; const char32_t abbr;
-    const ustr description;
-
-    const ustr value_doc;
-    const bool value_allowed;
-    const bool value_emptyallowed;
-
-    bool set;
-    ustr set_value;
-  };
-
-  struct _Subcommand: public _Subargument {
-    _Subcommand(const ustr name, const char32_t abbr,
-      const ustr description, const ustr value_doc,
-      const bool value_allowed, const bool value_emptyallowed,
-      const std::forward_list<ustr> subarguments);
-
-    /* Required arguments for this subcommand.  */
-    const std::forward_list<ustr> subarguments;
-  };
 
   /* Memory location of subcommands and -arguments.  */
   std::forward_list<_Subargument> subargs;
