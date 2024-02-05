@@ -49,8 +49,7 @@ socialmedia_signer::Params::Subcommand::Subcommand(
   const ustr name, const char32_t abbr, const ustr description,
   const ustr value_doc, const bool value_allowed,
   const bool value_emptyallowed,
-  const std::forward_list<ustr> subargs_required,
-  const std::forward_list<ustr> subargs_optional)
+  const char32_t* subargs_required, const char32_t* subargs_optional)
   :Subargument(name, abbr, description, value_doc, value_allowed,
                 value_emptyallowed),
    subargs_required(subargs_required),
@@ -72,20 +71,20 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
      Subcommand(u8"sign", u8's',
        u8"post a signed message to <platform>",
        u8"<platform>", true, false,
-       {u8"text"},
-       {u8"image"}),
+       U"t",
+       U"i"),
      Subcommand(u8"verify", u8'v',
        u8"verify a post with a QR signature at <url>",
        u8"<url>", true, false,
-       {},
-       {}),
+       U"",
+       U""),
 
      Subcommand(u8"help", u8'?',
        u8"display this help and exit",
-       u8"", false, true, {}, {}),
+       u8"", false, true, U"", U""),
      Subcommand(u8"version", u8'V',
        u8"output version information and exit",
-       u8"", false, true, {}, {})
+       u8"", false, true, U"", U"")
    }), subarg_map(), subcmd_map(), subcommand(nullptr)
 {
   /* UARGV: modifiable storage for parsing  */
@@ -241,26 +240,28 @@ socialmedia_signer::Params::print_help() const
   Log::println(ustr::format("  {} (for GUI)", command_name));
 #endif
 
-  for(const Subcommand& scmd: this->subcmds) {
+  for (const Subcommand& scmd: this->subcmds) {
     if (scmd.abbr == u8'?' || scmd.abbr == u8'V') continue;
 
     ustr out = ustr::format("  {} {}",
                             command_name, this->format(scmd, false));
 
-    for (const ustr& sarg_req_str: scmd.subargs_required) {
-      const Subargument* sarg_req = this->get_subargument(sarg_req_str);
+    for (const char32_t* sarg_req_abbr = scmd.subargs_required;
+         *sarg_req_abbr != U'\0'; sarg_req_abbr++) {
+      const Subargument* sarg_req = this->get_subargument(*sarg_req_abbr);
       if (sarg_req == nullptr) {
-        Log::fatal(ustr::format("help: subarg --{} not implemented"
-          ", required for subcmd --{} !", sarg_req_str, scmd.name));
+        Log::fatal(ustr::format("help: subarg -{} not implemented"
+          ", required for subcmd --{} !", *sarg_req_abbr, scmd.name));
       }
       out = ustr::format("{} {}",
                          out, this->format(*sarg_req, true));
     }
-    for (const ustr& sarg_opt_str: scmd.subargs_optional) {
-      const Subargument* sarg_opt = this->get_subargument(sarg_opt_str);
+    for (const char32_t* sarg_opt_abbr = scmd.subargs_optional;
+         *sarg_opt_abbr != U'\0'; sarg_opt_abbr++) {
+      const Subargument* sarg_opt = this->get_subargument(*sarg_opt_abbr);
       if (sarg_opt == nullptr) {
-        Log::fatal(ustr::format("help: subarg --{} not implemented"
-          ", optional for subcmd --{} !", sarg_opt_str, scmd.name));
+        Log::fatal(ustr::format("help: subarg -{} not implemented"
+          ", optional for subcmd --{} !", *sarg_opt_abbr, scmd.name));
       }
       out = ustr::format("{} {}",
                          out, this->format(*sarg_opt, true, true));
@@ -270,14 +271,14 @@ socialmedia_signer::Params::print_help() const
   }
   Log::println(u8"\nSubcommands:");
 
-  for(const Subcommand& scmd: this->subcmds) {
+  for (const Subcommand& scmd: this->subcmds) {
     Log::println(
       ustr::format("  -{}, {: <19} {}",
         scmd.abbr, this->format(scmd, false), scmd.description));
   }
   Log::println(u8"\nSubarguments:");
 
-  for(const Subargument& sarg: this->subargs) {
+  for (const Subargument& sarg: this->subargs) {
     Log::println(
       ustr::format("  -{}, {: <19} {}",
         sarg.abbr, this->format(sarg, false), sarg.description));
@@ -294,9 +295,10 @@ socialmedia_signer::Params::get_subcommand() const
 }
 
 const socialmedia_signer::Params::Subcommand*
-socialmedia_signer::Params::get_subcommand(const ustr& scmd_str) const
+socialmedia_signer::Params::get_subcommand(const char32_t scmd_abbr)
+  const
 {
-  const auto& scmd_search = this->subcmd_map.find(scmd_str);
+  const auto& scmd_search = this->subcmd_map.find(scmd_abbr);
 
   if (scmd_search == subcmd_map.end()) return nullptr;
 
@@ -304,9 +306,10 @@ socialmedia_signer::Params::get_subcommand(const ustr& scmd_str) const
 }
 
 const socialmedia_signer::Params::Subargument*
-socialmedia_signer::Params::get_subargument(const ustr& sarg_str) const
+socialmedia_signer::Params::get_subargument(const char32_t scmd_abbr)
+  const
 {
-  const auto& sarg_search = this->subarg_map.find(sarg_str);
+  const auto& sarg_search = this->subarg_map.find(scmd_abbr);
 
   if (sarg_search == subarg_map.end()) return nullptr;
 
@@ -367,7 +370,7 @@ socialmedia_signer::Params::check_subcommands(
 {
   if (!this->check_subaruments(
     reinterpret_cast<std::forward_list<Subargument>*>(&this->subcmds),
-    reinterpret_cast<std::map<ustr, Subargument*>*>(&this->subcmd_map),
+    reinterpret_cast<std::map<char32_t, Subargument*>*>(&this->subcmd_map),
     parsed_names, parsed_abbrs)) return false;
 
   for (const Subcommand& scmd: this->subcmds) {
@@ -379,13 +382,15 @@ socialmedia_signer::Params::check_subcommands(
         this->subcommand->name, scmd.name));
     }
 
-    for (const ustr& sargstr: scmd.subargs_required) {
-      const auto& sarg_search = this->subarg_map.find(sargstr);
+    for (const char32_t* sarg_req_abbr = scmd.subargs_required;
+         *sarg_req_abbr != U'\0'; sarg_req_abbr++) {
+      const auto& sarg_search = this->subarg_map.find(*sarg_req_abbr);
       if (sarg_search != subarg_map.end()
           && sarg_search->second->set) continue;
 
       return this->print_error(ustr::format(
-        "subcommand --{} requires --{} to be set !", scmd.name, sargstr));
+        "subcommand --{} requires -{} to be set !",
+        scmd.name, *sarg_req_abbr));
     }
 
     this->subcommand = &scmd;
@@ -399,10 +404,12 @@ socialmedia_signer::Params::check_subcommands(
         "subargument --{} without a subcommand !", sarg.name));
     }
 
-    for (const ustr& cur_req: this->subcommand->subargs_required)
-      if (cur_req.compare(sarg.name) == 0) goto continue_outer;
-    for (const ustr& cur_opt: this->subcommand->subargs_optional)
-      if (cur_opt.compare(sarg.name) == 0) goto continue_outer;
+    for (const char32_t* cur_req = this->subcommand->subargs_required;
+         *cur_req != U'\0'; cur_req++)
+      if (*cur_req == sarg.abbr) goto continue_outer;
+    for (const char32_t* cur_opt = this->subcommand->subargs_optional;
+         *cur_opt != U'\0'; cur_opt++)
+      if (*cur_opt == sarg.abbr) goto continue_outer;
 
     return this->print_error(ustr::format(
       "--{} is not a subargument of subcommand --{} !",
@@ -417,7 +424,7 @@ socialmedia_signer::Params::check_subcommands(
 bool
 socialmedia_signer::Params::check_subaruments(
   std::forward_list<Subargument>* subargs,
-  std::map<ustr, Subargument*>* subarg_map,
+  std::map<char32_t, Subargument*>* subarg_map,
   std::map<ustr, ustr>& parsed_names,
   std::map<char32_t, ustr>& parsed_abbrs) const
 {
@@ -461,7 +468,7 @@ socialmedia_signer::Params::check_subaruments(
         sarg.name, sarg.value_doc));
     }
 
-    const auto& [_, success] = subarg_map->insert({sarg.name, &sarg});
+    const auto& [_, success] = subarg_map->insert({sarg.abbr, &sarg});
     if (!success) {
       Log::fatal(ustr::format(
         "Could not insert subargument --{}, -{}, '{}'!  Double insert?",

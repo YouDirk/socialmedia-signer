@@ -51,12 +51,14 @@ public:
     Subcommand(const ustr name, const char32_t abbr,
       const ustr description, const ustr value_doc,
       const bool value_allowed, const bool value_emptyallowed,
-      const std::forward_list<ustr> subargs_required,
-      const std::forward_list<ustr> subargs_optional);
+      const char32_t* subargs_required,
+      const char32_t* subargs_optional);
 
-    /* Required arguments for this subcommand.  */
-    const std::forward_list<ustr> subargs_required;
-    const std::forward_list<ustr> subargs_optional;
+    /* Arguments for this subcommand.  U'\0'-terminated list of
+     * abbreviations.
+     */
+    const char32_t* subargs_required;
+    const char32_t* subargs_optional;
   };
 
   /* -------------------------------------------------------------  */
@@ -77,8 +79,10 @@ public:
   virtual void print_help() const;
 
   virtual const Subcommand* get_subcommand() const;
-  virtual const Subcommand* get_subcommand(const ustr& scmd_str) const;
-  virtual const Subargument* get_subargument(const ustr& sarg_str) const;
+  virtual const Subcommand* get_subcommand(const char32_t scmd_abbr)
+    const;
+  virtual const Subargument* get_subargument(const char32_t sarg_abbr)
+    const;
 
   /* -------------------------------------------------------------  */
 protected:
@@ -91,7 +95,7 @@ protected:
     std::map<char32_t, ustr>& parsed_abbrs);
   virtual bool check_subaruments(
     std::forward_list<Subargument>* subargs,
-    std::map<ustr, Subargument*>* subarg_map,
+    std::map<char32_t, Subargument*>* subarg_map,
     std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs) const;
 
@@ -163,8 +167,8 @@ private:
   std::forward_list<Subcommand>  subcmds;
 
   /* Used to lookup the lists above.  */
-  std::map<ustr, Subargument*> subarg_map;
-  std::map<ustr, Subcommand*>  subcmd_map;
+  std::map<char32_t, Subargument*> subarg_map;
+  std::map<char32_t, Subcommand*>  subcmd_map;
 
   const Subcommand* subcommand;
 
