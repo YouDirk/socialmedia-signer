@@ -31,6 +31,7 @@ namespace socialmedia_signer {
 class Params
 {
 public:
+
   struct Subargument {
     Subargument(const ustr name, const char32_t abbr,
       const ustr description,const ustr value_doc,
@@ -79,25 +80,27 @@ public:
   virtual void print_help() const;
 
   virtual const Subcommand* get_subcommand() const;
-  virtual const Subcommand* get_subcommand(const char32_t scmd_abbr)
+  virtual const Subcommand& get_subcommand(const char32_t scmd_abbr)
     const;
-  virtual const Subargument* get_subargument(const char32_t sarg_abbr)
+  virtual const Subargument& get_subargument(const char32_t sarg_abbr)
     const;
 
   /* -------------------------------------------------------------  */
 protected:
+  class CmdErr: public Error { public: CmdErr(const ustr& reason); };
+
   virtual const ustr format(const Subargument& subarg, bool abbr=false,
                             bool optional=false) const;
 
-  virtual bool check_parameters(std::map<ustr, ustr>& parsed_names,
-    std::map<char32_t, ustr>& parsed_abbrs);
-  virtual bool check_subcommands(std::map<ustr, ustr>& parsed_names,
-    std::map<char32_t, ustr>& parsed_abbrs);
-  virtual bool check_subaruments(
+  virtual void check_parameters(std::map<ustr, ustr>& parsed_names,
+    std::map<char32_t, ustr>& parsed_abbrs) noexcept(false);
+  virtual void check_subcommands(std::map<ustr, ustr>& parsed_names,
+    std::map<char32_t, ustr>& parsed_abbrs) noexcept(false);
+  virtual void check_subaruments(
     std::forward_list<Subargument>* subargs,
     std::map<char32_t, Subargument*>* subarg_map,
     std::map<ustr, ustr>& parsed_names,
-    std::map<char32_t, ustr>& parsed_abbrs) const;
+    std::map<char32_t, ustr>& parsed_abbrs) const noexcept(false);
 
   /* -------------------------------------------------------------  */
 
@@ -131,23 +134,21 @@ protected:
    */
 
   virtual void parse_argv0(ustr& out, const ustr& argv0) const;
-  virtual bool parse_argv(std::map<ustr, ustr>& parsed_names,
+  virtual void parse_argv(std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
-    const ustr& argv) const;
+    const ustr& argv) const noexcept(false);
 
-  virtual bool parse_name(std::map<ustr, ustr>& parsed_names,
-    const ustr& argv) const;
-  virtual bool parse_value(std::map<ustr, ustr>& parsed_names,
-    const ustr& param_name, const ustr& argv) const;
+  virtual void parse_name(std::map<ustr, ustr>& parsed_names,
+    const ustr& argv) const noexcept(false);
+  virtual void parse_value(std::map<ustr, ustr>& parsed_names,
+    const ustr& param_name, const ustr& argv) const noexcept(false);
 
-  virtual bool parse_abbr(std::map<char32_t, ustr>& parsed_abbrs,
-    ustr& argv_next, const ustr& argv) const;
-  virtual bool parse_abbr_next(std::map<char32_t, ustr>& parsed_abbrs,
-    ustr& argv_next, const ustr& argv) const;
-  virtual bool parse_argv_next(std::map<char32_t, ustr>& parsed_abbrs,
-    ustr& argv_next, const char32_t abbr_name) const;
-
-  virtual bool print_error(const ustr& msg) const;
+  virtual void parse_abbr(std::map<char32_t, ustr>& parsed_abbrs,
+    ustr& argv_next, const ustr& argv) const noexcept(false);
+  virtual void parse_abbr_next(std::map<char32_t, ustr>& parsed_abbrs,
+    ustr& argv_next, const ustr& argv) const noexcept(false);
+  virtual void parse_argv_next(std::map<char32_t, ustr>& parsed_abbrs,
+    ustr& argv_next, const char32_t abbr_name) const noexcept(false);
 
   /* -------------------------------------------------------------  */
 

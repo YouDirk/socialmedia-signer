@@ -16,51 +16,30 @@
  */
 
 
-#include "Params.hpp"
+#ifndef ERROR_HPP__
+#define ERROR_HPP__
 
 #include "Common.hpp"
 
 /* ***************************************************************  */
 
-using namespace socialmedia_signer;
+namespace socialmedia_signer {
 
-int
-main(int argc, const char** argv)
+class Error: public std::runtime_error
 {
-  MTRACE();
-  try {
+public:
+  Error(const ustr& reason);
 
-    Params::init(argc, argv);
+  virtual const char* what() const noexcept override;
+  virtual const ustr& uwhat() const noexcept;
 
-    /* -----------------------------------------------------------  */
+private:
+  const ustr reason;
+  const std::u8string reason_buf;
+};
 
-    if (Common::get_exit_code() < 0) {
-
-#ifdef CONFIG_GUI
-      Log::warn(u8"Not implemented -- GUI should run now.");
-#else
-      const Params* params = Params::get();
-      const ustr& cmd_name = params->get_command_name();
-
-      params->print_version();
-      Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
-#endif
-
-    }
-
-    /* -----------------------------------------------------------  */
-
-    Params::release();
-
-    // Catch all possible runtime errors here at the latest.
-  } catch(std::runtime_error& e) {
-    Log::error((const char8_t*) e.what());
-    Common::set_exit_code(EXIT_FAILURE);
-  }
-  MUNTRACE();
-
-  int exit_code = Common::get_exit_code();
-  return exit_code < 0? EXIT_SUCCESS: exit_code;
 }
 
 /* ***************************************************************  */
+
+#endif /* ERROR_HPP__  */

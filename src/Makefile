@@ -16,6 +16,6 @@
 
 
 OUTPUT := socialmedia-signer
-OBJ := Common ustr Log Params main
+OBJ := Common ustr Log Error Params main
 
 include ../makeinc/makefile.inc.mk

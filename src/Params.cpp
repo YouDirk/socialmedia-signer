@@ -112,8 +112,8 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
     ustr emptystr = u8"";
     next = i < argc-1? &uargv[i+1]: &emptystr;
 
-    if (!this->parse_argv(parsed_names, parsed_abbrs, *next, uargv[i]))
-      std::exit(EXIT_FAILURE);
+    /* may throw CmdErr()  */
+    this->parse_argv(parsed_names, parsed_abbrs, *next, uargv[i]);
   }
   /* UARGV modified here, during parsing!  */
 
@@ -121,8 +121,8 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
    * Check parsed parameters and build subcommands and subarguments.
    */
 
-  if (!this->check_parameters(parsed_names, parsed_abbrs))
-    std::exit(EXIT_FAILURE);
+  /* may throw CmdErr()  */
+  this->check_parameters(parsed_names, parsed_abbrs);
 
 #ifdef DEBUG_PARAMS
   for (const auto& subarg_search: this->subarg_map) {
@@ -237,7 +237,7 @@ socialmedia_signer::Params::print_help() const
   Log::println(COMMON_APP_NAME u8"\n\n" COMMON_APP_DESC u8"\n\nUsage:");
 
 #ifdef CONFIG_GUI
-  Log::println(ustr::format("  {} (for GUI)", command_name));
+  Log::println(ustr::format("  {} (GUI)", command_name));
 #endif
 
   for (const Subcommand& scmd: this->subcmds) {
@@ -248,23 +248,13 @@ socialmedia_signer::Params::print_help() const
 
     for (const char32_t* sarg_req_abbr = scmd.subargs_required;
          *sarg_req_abbr != U'\0'; sarg_req_abbr++) {
-      const Subargument* sarg_req = this->get_subargument(*sarg_req_abbr);
-      if (sarg_req == nullptr) {
-        Log::fatal(ustr::format("help: subarg -{} not implemented"
-          ", required for subcmd --{} !", *sarg_req_abbr, scmd.name));
-      }
-      out = ustr::format("{} {}",
-                         out, this->format(*sarg_req, true));
+      const Subargument& sarg_req = this->get_subargument(*sarg_req_abbr);
+      out = ustr::format("{} {}", out, this->format(sarg_req, true));
     }
     for (const char32_t* sarg_opt_abbr = scmd.subargs_optional;
          *sarg_opt_abbr != U'\0'; sarg_opt_abbr++) {
-      const Subargument* sarg_opt = this->get_subargument(*sarg_opt_abbr);
-      if (sarg_opt == nullptr) {
-        Log::fatal(ustr::format("help: subarg -{} not implemented"
-          ", optional for subcmd --{} !", *sarg_opt_abbr, scmd.name));
-      }
-      out = ustr::format("{} {}",
-                         out, this->format(*sarg_opt, true, true));
+      const Subargument& sarg_opt = this->get_subargument(*sarg_opt_abbr);
+      out = ustr::format("{} {}", out, this->format(sarg_opt, true, true));
     }
 
     Log::println(out);
@@ -294,26 +284,32 @@ socialmedia_signer::Params::get_subcommand() const
   return this->subcommand;
 }
 
-const socialmedia_signer::Params::Subcommand*
+const socialmedia_signer::Params::Subcommand&
 socialmedia_signer::Params::get_subcommand(const char32_t scmd_abbr)
   const
 {
   const auto& scmd_search = this->subcmd_map.find(scmd_abbr);
 
-  if (scmd_search == subcmd_map.end()) return nullptr;
+  if (scmd_search == subcmd_map.end()) {
+    Log::fatal(ustr::format("Could not get subcommand -{}!",
+                            scmd_abbr));
+  }
 
-  return scmd_search->second;
+  return *scmd_search->second;
 }
 
-const socialmedia_signer::Params::Subargument*
-socialmedia_signer::Params::get_subargument(const char32_t scmd_abbr)
+const socialmedia_signer::Params::Subargument&
+socialmedia_signer::Params::get_subargument(const char32_t sarg_abbr)
   const
 {
-  const auto& sarg_search = this->subarg_map.find(scmd_abbr);
+  const auto& sarg_search = this->subarg_map.find(sarg_abbr);
 
-  if (sarg_search == subarg_map.end()) return nullptr;
+  if (sarg_search == subarg_map.end()) {
+    Log::fatal(ustr::format("Could not get subargument -{}!",
+                            sarg_abbr));
+  }
 
-  return sarg_search->second;
+  return *sarg_search->second;
 }
 
 /* ***************************************************************  */
@@ -339,45 +335,41 @@ socialmedia_signer::Params::format(const Subargument& subarg,
   return out;
 }
 
-bool
+void
 socialmedia_signer::Params::check_parameters(
   std::map<ustr, ustr>& parsed_names,
-  std::map<char32_t, ustr>& parsed_abbrs)
+  std::map<char32_t, ustr>& parsed_abbrs) noexcept(false)
 {
-  if (!this->check_subaruments(&this->subargs, &this->subarg_map,
-                               parsed_names, parsed_abbrs))
-    return false;
+  this->check_subaruments(&this->subargs, &this->subarg_map,
+                          parsed_names, parsed_abbrs);
 
-  if (!this->check_subcommands(parsed_names, parsed_abbrs))
-    return false;
+  this->check_subcommands(parsed_names, parsed_abbrs);
 
   if (!parsed_names.empty()) {
-    return this->print_error(ustr::format(
-      "--{} unknown parameter name !", parsed_names.begin()->first));
+    throw CmdErr(ustr::format("--{} unknown parameter name !",
+                              parsed_names.begin()->first));
   }
   if (!parsed_abbrs.empty()) {
-    return this->print_error(ustr::format(
-      "-{} unknown parameter !", parsed_abbrs.begin()->first));
+    throw CmdErr(ustr::format("-{} unknown parameter !",
+                              parsed_abbrs.begin()->first));
   }
-
-  return true;
 }
 
-bool
+void
 socialmedia_signer::Params::check_subcommands(
   std::map<ustr, ustr>& parsed_names,
-  std::map<char32_t, ustr>& parsed_abbrs)
+  std::map<char32_t, ustr>& parsed_abbrs) noexcept(false)
 {
-  if (!this->check_subaruments(
+  this->check_subaruments(
     reinterpret_cast<std::forward_list<Subargument>*>(&this->subcmds),
     reinterpret_cast<std::map<char32_t, Subargument*>*>(&this->subcmd_map),
-    parsed_names, parsed_abbrs)) return false;
+    parsed_names, parsed_abbrs);
 
   for (const Subcommand& scmd: this->subcmds) {
     if (!scmd.set) continue;
 
     if (this->subcommand != nullptr) {
-      return this->print_error(ustr::format(
+      throw CmdErr(ustr::format(
         "subcommands --{} and --{} set, choose just one please !",
         this->subcommand->name, scmd.name));
     }
@@ -388,8 +380,7 @@ socialmedia_signer::Params::check_subcommands(
       if (sarg_search != subarg_map.end()
           && sarg_search->second->set) continue;
 
-      return this->print_error(ustr::format(
-        "subcommand --{} requires -{} to be set !",
+      throw CmdErr(ustr::format("subcommand --{} requires -{} to be set !",
         scmd.name, *sarg_req_abbr));
     }
 
@@ -400,7 +391,7 @@ socialmedia_signer::Params::check_subcommands(
     if (!sarg.set) continue;
 
     if (this->subcommand == nullptr) {
-      return this->print_error(ustr::format(
+      throw CmdErr(ustr::format(
         "subargument --{} without a subcommand !", sarg.name));
     }
 
@@ -411,22 +402,20 @@ socialmedia_signer::Params::check_subcommands(
          *cur_opt != U'\0'; cur_opt++)
       if (*cur_opt == sarg.abbr) goto continue_outer;
 
-    return this->print_error(ustr::format(
+    throw CmdErr(ustr::format(
       "--{} is not a subargument of subcommand --{} !",
       sarg.name, this->subcommand->name));
 
   continue_outer:;
   }
-
-  return true;
 }
 
-bool
+void
 socialmedia_signer::Params::check_subaruments(
   std::forward_list<Subargument>* subargs,
   std::map<char32_t, Subargument*>* subarg_map,
   std::map<ustr, ustr>& parsed_names,
-  std::map<char32_t, ustr>& parsed_abbrs) const
+  std::map<char32_t, ustr>& parsed_abbrs) const noexcept(false)
 {
   for (Subargument& sarg: *subargs) {
     const auto& name_search = parsed_names.find(sarg.name);
@@ -443,9 +432,9 @@ socialmedia_signer::Params::check_subaruments(
     const auto& abbr_search = parsed_abbrs.find(sarg.abbr);
     if (abbr_search != parsed_abbrs.end()) {
       if (sarg.set) {
-        return this->print_error(ustr::format(
-          "--{} and -{} given, but just one of them needed !", sarg.name,
-          sarg.abbr, sarg.set_value));
+        throw CmdErr(ustr::format(
+          "--{} and -{} given, but just one of them needed !",
+          sarg.name, sarg.abbr, sarg.set_value));
       }
 
       sarg.set = true;
@@ -458,14 +447,14 @@ socialmedia_signer::Params::check_subaruments(
     }
 
     if (sarg.set && !sarg.value_allowed && !sarg.set_value.empty()) {
-      return this->print_error(ustr::format(
-        "--{} value needs to be empty, but set to --{}={} !", sarg.name,
-        sarg.name, sarg.set_value));
+      throw CmdErr(ustr::format(
+        "--{} value needs to be empty, but set to --{}={} !",
+        sarg.name, sarg.name, sarg.set_value));
     }
     if (sarg.set && !sarg.value_emptyallowed && sarg.set_value.empty()) {
-      return this->print_error(ustr::format(
-        "--{} a value is required, example --{}={} !", sarg.name,
-        sarg.name, sarg.value_doc));
+      throw CmdErr(ustr::format(
+        "--{} a value is required, example --{}={} !",
+        sarg.name, sarg.name, sarg.value_doc));
     }
 
     const auto& [_, success] = subarg_map->insert({sarg.abbr, &sarg});
@@ -475,8 +464,6 @@ socialmedia_signer::Params::check_subaruments(
         sarg.name, sarg.abbr, sarg.description));
     }
   }
-
-  return true;
 }
 
 /* ***************************************************************  */
@@ -498,38 +485,34 @@ socialmedia_signer::Params::parse_argv0(ustr& out, const ustr& argv0)
   /* {terminate}  */
 }
 
-bool
+void
 socialmedia_signer::Params::parse_argv(
   std::map<ustr, ustr>& parsed_names,
   std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
-  const ustr& argv) const
+  const ustr& argv) const noexcept(false)
 {
-  if (argv.empty()) return true;
+  if (argv.empty()) return;
 
-  if (argv[0] != u8'-' || argv.length() < 2) {
-    return this->print_error(ustr::format(
-                                      "'{}' not a parameter !", argv));
-  }
+  if (argv[0] != u8'-' || argv.length() < 2)
+    throw CmdErr(ustr::format("'{}' not a parameter !", argv));
 
-  if (argv[1] == u8'-') {
-    return this->parse_name(parsed_names, argv.substr(1));
-  }
-
-  return this->parse_abbr(parsed_abbrs, argv_next, argv.substr(1));
+  if (argv[1] == u8'-')
+    this->parse_name(parsed_names, argv.substr(1));
+  else
+    this->parse_abbr(parsed_abbrs, argv_next, argv.substr(1));
 }
 
 /* ---------------------------------------------------------------  */
 
-bool
+void
 socialmedia_signer::Params::parse_name(
-  std::map<ustr, ustr>& parsed_names, const ustr& argv) const
+  std::map<ustr, ustr>& parsed_names, const ustr& argv)
+  const noexcept(false)
 {
   const std::size_t argv_len = argv.length();
 
-  if (argv_len < 1 || argv[0] != u8'-') {
-    return this->print_error(ustr::format(
-                                "-{} not a parameter name  !", argv));
-  }
+  if (argv_len < 1 || argv[0] != u8'-')
+    throw CmdErr(ustr::format("-{} not a parameter name  !", argv));
 
   unsigned name_len;
   for (name_len=0; 1+name_len < argv_len; name_len++) {
@@ -539,25 +522,22 @@ socialmedia_signer::Params::parse_name(
   ustr param_name = argv.substr(1, name_len);
   const std::size_t param_len = param_name.length();
 
-  if (param_len < 1) {
-    return this->print_error(ustr::format(
-                                 "-{} empty parameter name !", argv));
-  }
+  if (param_len < 1)
+    throw CmdErr(ustr::format("-{} empty parameter name !", argv));
 
   if (param_name.length() < 2) {
-    return this->print_error(ustr::format(
+    throw CmdErr(ustr::format(
       "--{} incomplete parameter name for -{} !  Did you mean -{} ?",
       param_name, argv, param_name));
   }
 
-  return this->parse_value(parsed_names, param_name,
-                           argv.substr(1+name_len));
+  this->parse_value(parsed_names, param_name, argv.substr(1+name_len));
 }
 
-bool
+void
 socialmedia_signer::Params::parse_value(
   std::map<ustr, ustr>& parsed_names, const ustr& param_name,
-  const ustr& argv) const
+  const ustr& argv) const noexcept(false)
 {
   ustr value;
 
@@ -565,8 +545,8 @@ socialmedia_signer::Params::parse_value(
     value = u8"";
     /* {terminate}  */
   } else if (argv[0] != u8'=') {
-    return this->print_error(ustr::format(
-      "Garbage '{}' behind --{} !", argv, param_name));
+    throw CmdErr(ustr::format("Garbage '{}' behind --{} !",
+                              argv, param_name));
   } else {
     value = argv.substr(1);
     /* {terminate}  */
@@ -574,61 +554,58 @@ socialmedia_signer::Params::parse_value(
 
   const auto& [_, success] = parsed_names.insert({param_name, value});
   if (!success) {
-    return this->print_error(ustr::format(
-      "--{} double parameter name !", param_name));
+    throw CmdErr(ustr::format("--{} double parameter name !",
+                              param_name));
   }
-
-  return true;
 }
 
 /* ---------------------------------------------------------------  */
 
-bool
+void
 socialmedia_signer::Params::parse_abbr(
   std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
-  const ustr& argv) const
+  const ustr& argv) const noexcept(false)
 {
-  if (argv.empty()) {
-    return this->print_error(ustr::format(
-      "'-' empty parameter abbreviation !"));
-  }
+  if (argv.empty())
+    throw CmdErr(u8"'-' empty parameter abbreviation !");
 
-  return this->parse_abbr_next(parsed_abbrs, argv_next, argv);
+  this->parse_abbr_next(parsed_abbrs, argv_next, argv);
 }
 
-bool
+void
 socialmedia_signer::Params::parse_abbr_next(
   std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
-  const ustr& argv) const
+  const ustr& argv) const noexcept(false)
 {
   char32_t abbr_name = argv[0];
   if (!(IS_CHAR_ALPHANUM(abbr_name) || abbr_name == u8'?')) {
     if (abbr_name == u8'=')
-      return this->print_error(ustr::format(
-        "-example{} not a parameter !  Did you mean"
-        " --example{} or '-e {}' ?", argv, argv, argv.substr(1)));
+      throw CmdErr(ustr::format("-example{} not a parameter !  Did you"
+        " mean --example{} or '-e {}' ?", argv, argv, argv.substr(1)));
     else
-      return this->print_error(ustr::format(
-        "-{} not a parameter abbreviation !", abbr_name));
+      throw CmdErr(ustr::format("-{} not a parameter abbreviation !",
+                                abbr_name));
   }
 
   /* Is last character ?  */
-  if (argv.length() < 2)
-    return this->parse_argv_next(parsed_abbrs, argv_next, abbr_name);
+  if (argv.length() < 2) {
+    this->parse_argv_next(parsed_abbrs, argv_next, abbr_name);
+    return;
+  }
 
   const auto& [_, success] = parsed_abbrs.insert({abbr_name, u8""});
   if (!success) {
-    return this->print_error(ustr::format(
-      "-{} double parameter abbreviation !", abbr_name));
+    throw CmdErr(ustr::format("-{} double parameter abbreviation !",
+                              abbr_name));
   }
 
-  return this->parse_abbr_next(parsed_abbrs, argv_next, argv.substr(1));
+  this->parse_abbr_next(parsed_abbrs, argv_next, argv.substr(1));
 }
 
-bool
+void
 socialmedia_signer::Params::parse_argv_next(
   std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
-  const char32_t abbr_name) const
+  const char32_t abbr_name) const noexcept(false)
 {
   ustr value;
 
@@ -641,25 +618,17 @@ socialmedia_signer::Params::parse_argv_next(
 
   const auto& [_, success] = parsed_abbrs.insert({abbr_name, value});
   if (!success) {
-    return this->print_error(ustr::format(
-      "-{} double parameter abbreviation !", abbr_name));
+    throw CmdErr(ustr::format("-{} double parameter abbreviation !",
+                              abbr_name));
   }
-
-  return true;
 }
 
 /* ---------------------------------------------------------------  */
 
-bool
-socialmedia_signer::Params::print_error(const ustr& msg) const
-{
-  const ustr& cmd_name = Params::get_command_name();
-
-  ustr out = ustr::format(
-    "command-line: {}  Try '{} --help' for full help.", msg, cmd_name);
-  Log::error(out);
-
-  return false;
-}
+socialmedia_signer::Params::CmdErr::CmdErr(const ustr& reason)
+  :Error(ustr::format(
+    "command-line: {}  Try '{} --help' for full help.",
+    reason, Params::get_command_name()))
+{}
 
 /* ***************************************************************  */

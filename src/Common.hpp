@@ -41,6 +41,7 @@
 #include "ustr.hpp"
 
 #include "Log.hpp"
+#include "Error.hpp"
 
 /* ***************************************************************  */
 
