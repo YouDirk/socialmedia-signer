@@ -16,51 +16,16 @@
  */
 
 
-#ifndef LOG_HPP__
-#define LOG_HPP__
-
-#include "Common.hpp"
+#include "Image.hpp"
 
 /* ***************************************************************  */
 
-namespace socialmedia_signer {
-
-/**
- * Abstract class which includes static methods for outputting
- * text messages to log or console.
- */
-class Log
+socialmedia_signer::Image::Image()
 {
-public:
-  /* Abstract class  */
-  Log()           = delete;
-  Log(Log& other) = delete;
-  virtual ~Log()  = 0;
+}
 
-  /* -------------------------------------------------------------  */
-
-  static void print(const ustr& msg);
-
-  static void println(const ustr& msg);
-  static void println();
-
-  /* -------------------------------------------------------------  */
-
-#ifdef DEBUG
-  static void debug(const ustr& msg);
-#else
-  static void debug([[maybe_unused]] const ustr& msg) {};
-#endif
-
-  static void note(const ustr& msg);
-  static void warn(const ustr& msg);
-  static void error(const ustr& msg);
-
-  static void fatal(const ustr& msg, int exit_code = 0xff);
-};
-
+socialmedia_signer::Image::~Image()
+{
 }
 
 /* ***************************************************************  */
-
-#endif /* LOG_HPP__  */

@@ -16,8 +16,12 @@
  */
 
 
-#ifndef LOG_HPP__
-#define LOG_HPP__
+#ifndef APP_HPP__
+#define APP_HPP__
+
+#include "IPlatform.hpp"
+#include "Image.hpp"
+#include "SignedData.hpp"
 
 #include "Common.hpp"
 
@@ -26,41 +30,30 @@
 namespace socialmedia_signer {
 
 /**
- * Abstract class which includes static methods for outputting
- * text messages to log or console.
+ * Class which implements the core functionality of the Socialmedia
+ * Signer.
+ *
+ * This class is the interface to the command-line ::Params and GUI.
  */
-class Log
+class App
 {
 public:
-  /* Abstract class  */
-  Log()           = delete;
-  Log(Log& other) = delete;
-  virtual ~Log()  = 0;
+  explicit App();
+  virtual ~App();
 
-  /* -------------------------------------------------------------  */
+  virtual const SignedData& sign(const IPlatform& platform,
+    const ustr& message, const Image* image = nullptr)
+    const noexcept(false);
 
-  static void print(const ustr& msg);
+  virtual const SignedData& verify(const ustr& url)
+    const noexcept(false);
 
-  static void println(const ustr& msg);
-  static void println();
-
-  /* -------------------------------------------------------------  */
-
-#ifdef DEBUG
-  static void debug(const ustr& msg);
-#else
-  static void debug([[maybe_unused]] const ustr& msg) {};
-#endif
-
-  static void note(const ustr& msg);
-  static void warn(const ustr& msg);
-  static void error(const ustr& msg);
-
-  static void fatal(const ustr& msg, int exit_code = 0xff);
+private:
+  SignedData* signed_data;
 };
 
 }
 
 /* ***************************************************************  */
 
-#endif /* LOG_HPP__  */
+#endif /* APP_HPP__  */

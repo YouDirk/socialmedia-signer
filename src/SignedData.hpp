@@ -16,8 +16,10 @@
  */
 
 
-#ifndef LOG_HPP__
-#define LOG_HPP__
+#ifndef SIGNEDDATA_HPP__
+#define SIGNEDDATA_HPP__
+
+#include "Image.hpp"
 
 #include "Common.hpp"
 
@@ -26,41 +28,29 @@
 namespace socialmedia_signer {
 
 /**
- * Abstract class which includes static methods for outputting
- * text messages to log or console.
+ * Class which includes all data which is needed to verify.  Is there
+ * a signature socialmedia_signer::Image is missing then it can be
+ * generated via signing.
  */
-class Log
+class SignedData
 {
 public:
-  /* Abstract class  */
-  Log()           = delete;
-  Log(Log& other) = delete;
-  virtual ~Log()  = 0;
+  explicit SignedData(
+    const std::u8string& signed_msg, const Image& signature);
+  virtual ~SignedData();
 
-  /* -------------------------------------------------------------  */
-
-  static void print(const ustr& msg);
-
-  static void println(const ustr& msg);
-  static void println();
-
-  /* -------------------------------------------------------------  */
-
-#ifdef DEBUG
-  static void debug(const ustr& msg);
-#else
-  static void debug([[maybe_unused]] const ustr& msg) {};
-#endif
-
-  static void note(const ustr& msg);
-  static void warn(const ustr& msg);
-  static void error(const ustr& msg);
-
-  static void fatal(const ustr& msg, int exit_code = 0xff);
+private:
+  /**
+   * Signed messages are needed to be `char8_t*` to make sure that
+   * std::codecvt.in()/.out() won't be executed to prevent conversion
+   * errors.
+   */
+  const std::u8string message;
+  const Image signature;
 };
 
 }
 
 /* ***************************************************************  */
 
-#endif /* LOG_HPP__  */
+#endif /* SIGNEDDATA_HPP__  */

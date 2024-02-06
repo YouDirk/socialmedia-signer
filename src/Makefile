@@ -16,6 +16,6 @@
 
 
 OUTPUT := socialmedia-signer
-OBJ := Common ustr Log Error Params main
+OBJ := Common ustr Log Error Params Image SignedData App main
 
 include ../makeinc/makefile.inc.mk

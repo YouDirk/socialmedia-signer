@@ -25,10 +25,14 @@
 
 namespace socialmedia_signer {
 
+/**
+ * Base class to `throw` errors.
+ */
 class Error: public std::runtime_error
 {
 public:
-  Error(const ustr& reason);
+  explicit Error(const ustr& reason);
+  virtual ~Error();
 
   virtual const char* what() const noexcept override;
   virtual const ustr& uwhat() const noexcept;

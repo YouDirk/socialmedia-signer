@@ -26,6 +26,11 @@ socialmedia_signer::Error::Error(const ustr& reason)
   this->reason.out_utf8(const_cast<std::u8string&>(this->reason_buf));
 }
 
+socialmedia_signer::Error::~Error()
+{}
+
+/* ***************************************************************  */
+
 const char*
 socialmedia_signer::Error::what() const noexcept
 {

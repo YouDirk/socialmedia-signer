@@ -16,51 +16,36 @@
  */
 
 
-#ifndef LOG_HPP__
-#define LOG_HPP__
-
-#include "Common.hpp"
+#include "App.hpp"
 
 /* ***************************************************************  */
 
-namespace socialmedia_signer {
-
-/**
- * Abstract class which includes static methods for outputting
- * text messages to log or console.
- */
-class Log
+socialmedia_signer::App::App()
+  :signed_data(nullptr)
 {
-public:
-  /* Abstract class  */
-  Log()           = delete;
-  Log(Log& other) = delete;
-  virtual ~Log()  = 0;
+}
 
-  /* -------------------------------------------------------------  */
+socialmedia_signer::App::~App()
+{
+}
 
-  static void print(const ustr& msg);
+/* ---------------------------------------------------------------  */
 
-  static void println(const ustr& msg);
-  static void println();
+const socialmedia_signer::SignedData&
+socialmedia_signer::App::sign(const IPlatform& platform,
+  const ustr& message, const Image* image) const noexcept(false)
+{
+  if (this->signed_data == nullptr) throw Error(u8"Not implemented!");
 
-  /* -------------------------------------------------------------  */
+  return *this->signed_data;
+}
 
-#ifdef DEBUG
-  static void debug(const ustr& msg);
-#else
-  static void debug([[maybe_unused]] const ustr& msg) {};
-#endif
+const socialmedia_signer::SignedData&
+socialmedia_signer::App::verify(const ustr& url) const noexcept(false)
+{
+  if (this->signed_data == nullptr) throw Error(u8"Not implemented!");
 
-  static void note(const ustr& msg);
-  static void warn(const ustr& msg);
-  static void error(const ustr& msg);
-
-  static void fatal(const ustr& msg, int exit_code = 0xff);
-};
-
+  return *this->signed_data;
 }
 
 /* ***************************************************************  */
-
-#endif /* LOG_HPP__  */

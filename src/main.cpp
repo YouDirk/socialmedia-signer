@@ -17,6 +17,7 @@
 
 
 #include "Params.hpp"
+#include "App.hpp"
 
 #include "Common.hpp"
 
@@ -24,6 +25,9 @@
 
 using namespace socialmedia_signer;
 
+/**
+ * Entry point for operating system using ISO C standard.
+ */
 int
 main(int argc, const char** argv)
 {
@@ -31,8 +35,11 @@ main(int argc, const char** argv)
   try {
 
     Params::init(argc, argv);
+    App* app = new App();
 
     /* -----------------------------------------------------------  */
+
+    // TODO: Do something with `app` ...
 
     if (Common::get_exit_code() < 0) {
 
@@ -50,11 +57,12 @@ main(int argc, const char** argv)
 
     /* -----------------------------------------------------------  */
 
+    delete app;
     Params::release();
 
-    // Catch all possible runtime errors here at the latest.
-  } catch(std::runtime_error& e) {
-    Log::error((const char8_t*) e.what());
+    /* Last chance to catch possible runtime-errors.  */
+  } catch (std::runtime_error& e) {
+    Log::error(reinterpret_cast<const char8_t*>(e.what()));
     Common::set_exit_code(EXIT_FAILURE);
   }
   MUNTRACE();

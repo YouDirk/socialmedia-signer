@@ -56,6 +56,10 @@
 
 namespace socialmedia_signer {
 
+/**
+ * Abstract class with static methods which can be accessed in the
+ * whole process.
+ */
 class Common
 {
 public:
@@ -64,7 +68,10 @@ public:
   Common(Common& other) = delete;
   virtual ~Common()  = 0;
 
-  /* Terminate the process regularly at the next chance.  */
+  /**
+   * Terminate the process in the regularly control flow at the next
+   * chance.
+   */
   static void set_exit_code(int exit_code = 0xff);
 
   static int get_exit_code();

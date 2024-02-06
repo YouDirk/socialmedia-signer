@@ -28,6 +28,12 @@
 
 namespace socialmedia_signer {
 
+/**
+ * Singleton class which can be accessed via Params::get().  Process
+ * wide it provides access to the parsed command-line subcommand/s via
+ * Params::get_subcommand() and it´s subarguments via
+ * Params::get_subargument().
+ */
 class Params
 {
 public:

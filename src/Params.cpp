@@ -153,8 +153,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
 }
 
 socialmedia_signer::Params::~Params()
-{
-}
+{}
 
 /* ***************************************************************  */
 
