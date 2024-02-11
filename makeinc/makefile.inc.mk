@@ -25,8 +25,12 @@ include ../makeinc/makefile.variables.mk
 .PHONY: all
 all: $(OUTPUT)
 
+# Use sub-make to allow parallel compilation (MAKE -j), as currently
+# .WAIT is not implemented and .NOTPARALLEL prerequisites are ignored
+# in GNU Make 4.3.
 .PHONY: recompile
-recompile: clean all
+recompile: clean
+	$(MAKE) all
 
 .PHONY: run
 run: all
