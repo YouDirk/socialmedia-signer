@@ -16,38 +16,17 @@
  */
 
 
-#ifndef IPLATFORM_HPP__
-#define IPLATFORM_HPP__
-
-#include "common.hpp"
+#include "PlatformXCom.hpp"
 
 /* ***************************************************************  */
 
-namespace socialmedia_signer {
-
-/**
- * Base interface class which needs to be implemented for every
- * supported social media platform.
- */
-class IPlatform
+socialmedia_signer::PlatformXCom::PlatformXCom()
+  :IPlatform(u8"xcom", u8"X.com by Elon Musk (former Twitter)")
 {
-public:
-  explicit IPlatform(const ustr& id, const ustr& name);
-  virtual ~IPlatform();
+}
 
-  const ustr& get_id();
-  const ustr& get_name();
-
-private:
-  /** Used as abbreviation for command-line parameters.  */
-  const ustr id;
-
-  /** Human readable name of the platform.  */
-  const ustr name;
-};
-
+socialmedia_signer::PlatformXCom::~PlatformXCom()
+{
 }
 
 /* ***************************************************************  */
-
-#endif /* IPLATFORM_HPP__  */

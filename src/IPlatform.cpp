@@ -16,38 +16,30 @@
  */
 
 
-#ifndef IPLATFORM_HPP__
-#define IPLATFORM_HPP__
-
-#include "common.hpp"
+#include "IPlatform.hpp"
 
 /* ***************************************************************  */
 
-namespace socialmedia_signer {
-
-/**
- * Base interface class which needs to be implemented for every
- * supported social media platform.
- */
-class IPlatform
+socialmedia_signer::IPlatform::IPlatform(
+  const ustr& id, const ustr& name)
+  :id(id), name(name)
 {
-public:
-  explicit IPlatform(const ustr& id, const ustr& name);
-  virtual ~IPlatform();
+}
 
-  const ustr& get_id();
-  const ustr& get_name();
+socialmedia_signer::IPlatform::~IPlatform()
+{
+}
 
-private:
-  /** Used as abbreviation for command-line parameters.  */
-  const ustr id;
+const socialmedia_signer::ustr&
+socialmedia_signer::IPlatform::get_id()
+{
+  return this->id;
+}
 
-  /** Human readable name of the platform.  */
-  const ustr name;
-};
-
+const socialmedia_signer::ustr&
+socialmedia_signer::IPlatform::get_name()
+{
+  return this->name;
 }
 
 /* ***************************************************************  */
-
-#endif /* IPLATFORM_HPP__  */

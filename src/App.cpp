@@ -36,15 +36,38 @@ socialmedia_signer::App::~App()
 void
 socialmedia_signer::App::run() const noexcept(false)
 {
-  // TODO: switch() subcommand...
-
-#ifndef CONFIG_GUI
   const Params* params = Params::get();
-  const ustr& cmd_name = params->get_command_name();
+  const Params::Subcommand* scmd = params->get_subcommand();
 
-  params->print_version();
-  Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
+  /* Subcommand via command-line?
+   *
+   * If no subcommand then regularly control-flow.
+   */
+  if (scmd == nullptr) {
+#ifndef CONFIG_GUI
+    const ustr& cmd_name = params->get_command_name();
+
+    params->print_version();
+    Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
 #endif
+
+    return;
+  }
+
+  /* Subcommand via command-line.  Apply it and terminate with
+   * Success().
+   */
+  switch (scmd->abbr) {
+  case U's':        /* --sign  */
+    Log::debug(u8"--sign");
+    break;
+  case U'v':        /* --sign  */
+    Log::debug(u8"--verify");
+    break;
+  default: break;
+  }
+
+  throw Success();
 }
 
 /* ---------------------------------------------------------------  */

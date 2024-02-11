@@ -37,7 +37,7 @@ int
 main(int argc, const char** argv)
 {
   int exit_code = EXIT_SUCCESS;
-  App* app;
+  App* app = nullptr;
 
   MTRACE();
   try {
@@ -54,8 +54,6 @@ main(int argc, const char** argv)
 
     app->run();
 
-    delete app;
-
   } catch (Success& s) {
     exit_code = EXIT_SUCCESS;
   } catch (Error& e) {
@@ -67,7 +65,9 @@ main(int argc, const char** argv)
     exit_code = EXIT_FAILURE;
   }
 
-  /* -----------------------------------------------------------**  */
+  delete app;
+
+  /* -------------------------------------------------------------  */
 
   Params::release();
 

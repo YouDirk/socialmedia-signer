@@ -16,38 +16,17 @@
  */
 
 
-#ifndef IPLATFORM_HPP__
-#define IPLATFORM_HPP__
-
-#include "common.hpp"
+#include "PlatformThreads.hpp"
 
 /* ***************************************************************  */
 
-namespace socialmedia_signer {
-
-/**
- * Base interface class which needs to be implemented for every
- * supported social media platform.
- */
-class IPlatform
+socialmedia_signer::PlatformThreads::PlatformThreads()
+  :IPlatform(u8"threads", u8"Threads by Instagram")
 {
-public:
-  explicit IPlatform(const ustr& id, const ustr& name);
-  virtual ~IPlatform();
+}
 
-  const ustr& get_id();
-  const ustr& get_name();
-
-private:
-  /** Used as abbreviation for command-line parameters.  */
-  const ustr id;
-
-  /** Human readable name of the platform.  */
-  const ustr name;
-};
-
+socialmedia_signer::PlatformThreads::~PlatformThreads()
+{
 }
 
 /* ***************************************************************  */
-
-#endif /* IPLATFORM_HPP__  */

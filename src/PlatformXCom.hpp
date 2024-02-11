@@ -16,8 +16,10 @@
  */
 
 
-#ifndef IPLATFORM_HPP__
-#define IPLATFORM_HPP__
+#ifndef PLATFORMXCOM_HPP__
+#define PLATFORMXCOM_HPP__
+
+#include "IPlatform.hpp"
 
 #include "common.hpp"
 
@@ -26,28 +28,17 @@
 namespace socialmedia_signer {
 
 /**
- * Base interface class which needs to be implemented for every
- * supported social media platform.
+ * X.com / Twitter
  */
-class IPlatform
+class PlatformXCom: public IPlatform
 {
 public:
-  explicit IPlatform(const ustr& id, const ustr& name);
-  virtual ~IPlatform();
-
-  const ustr& get_id();
-  const ustr& get_name();
-
-private:
-  /** Used as abbreviation for command-line parameters.  */
-  const ustr id;
-
-  /** Human readable name of the platform.  */
-  const ustr name;
+  explicit PlatformXCom();
+  virtual ~PlatformXCom();
 };
 
 }
 
 /* ***************************************************************  */
 
-#endif /* IPLATFORM_HPP__  */
+#endif /* PLATFORMXCOM_HPP__  */
