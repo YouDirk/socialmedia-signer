@@ -15,7 +15,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+include ../makefile.config.mk
+
+# ********************************************************************
+
 OUTPUT := socialmedia-signer
-OBJ := Common ustr Log Error Params Image SignedData App main
+
+OBJ := ustr Log Error Success Params Image SignedData App main
+ifneq (0,$(CONFIG_GUI))
+  OBJ += AppGui
+endif
+
+# ********************************************************************
 
 include ../makeinc/makefile.inc.mk

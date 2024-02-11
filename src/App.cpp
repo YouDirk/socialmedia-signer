@@ -18,6 +18,8 @@
 
 #include "App.hpp"
 
+#include "Params.hpp"
+
 /* ***************************************************************  */
 
 socialmedia_signer::App::App()
@@ -27,6 +29,22 @@ socialmedia_signer::App::App()
 
 socialmedia_signer::App::~App()
 {
+}
+
+/* ---------------------------------------------------------------  */
+
+void
+socialmedia_signer::App::run() const noexcept(false)
+{
+  // TODO: switch() subcommand...
+
+#ifndef CONFIG_GUI
+  const Params* params = Params::get();
+  const ustr& cmd_name = params->get_command_name();
+
+  params->print_version();
+  Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
+#endif
 }
 
 /* ---------------------------------------------------------------  */

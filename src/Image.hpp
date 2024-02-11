@@ -19,7 +19,7 @@
 #ifndef IMAGE_HPP__
 #define IMAGE_HPP__
 
-#include "Common.hpp"
+#include "common.hpp"
 
 /* ***************************************************************  */
 

@@ -21,7 +21,7 @@
 
 #include "Image.hpp"
 
-#include "Common.hpp"
+#include "common.hpp"
 
 /* ***************************************************************  */
 

@@ -19,7 +19,7 @@
 #ifndef PARAMS_HPP__
 #define PARAMS_HPP__
 
-#include "Common.hpp"
+#include "common.hpp"
 
 #include <map>
 #include <forward_list>

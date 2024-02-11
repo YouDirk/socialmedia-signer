@@ -17,9 +17,14 @@
 
 
 #include "Params.hpp"
-#include "App.hpp"
 
-#include "Common.hpp"
+#ifdef CONFIG_GUI
+#  include "AppGui.hpp"
+#else
+#  include "App.hpp"
+#endif
+
+#include "common.hpp"
 
 /* ***************************************************************  */
 
@@ -31,44 +36,44 @@ using namespace socialmedia_signer;
 int
 main(int argc, const char** argv)
 {
+  int exit_code = EXIT_SUCCESS;
+  App* app;
+
   MTRACE();
   try {
 
     Params::init(argc, argv);
-    App* app = new App();
 
     /* -----------------------------------------------------------  */
-
-    // TODO: Do something with `app` ...
-
-    if (Common::get_exit_code() < 0) {
 
 #ifdef CONFIG_GUI
-      Log::warn(u8"Not implemented -- GUI should run now.");
+    app = new AppGui();
 #else
-      const Params* params = Params::get();
-      const ustr& cmd_name = params->get_command_name();
-
-      params->print_version();
-      Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
+    app = new App();
 #endif
 
-    }
-
-    /* -----------------------------------------------------------  */
+    app->run();
 
     delete app;
-    Params::release();
 
-    /* Last chance to catch possible runtime-errors.  */
+  } catch (Success& s) {
+    exit_code = EXIT_SUCCESS;
+  } catch (Error& e) {
+    Log::error(e.uwhat());
+    exit_code = e.get_exit_code();
   } catch (std::runtime_error& e) {
+    /* Last chance to catch possible runtime-errors.  */
     Log::error(reinterpret_cast<const char8_t*>(e.what()));
-    Common::set_exit_code(EXIT_FAILURE);
+    exit_code = EXIT_FAILURE;
   }
+
+  /* -----------------------------------------------------------**  */
+
+  Params::release();
+
   MUNTRACE();
 
-  int exit_code = Common::get_exit_code();
-  return exit_code < 0? EXIT_SUCCESS: exit_code;
+  return exit_code;
 }
 
 /* ***************************************************************  */

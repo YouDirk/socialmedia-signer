@@ -19,14 +19,14 @@
 #ifndef IPLATFORM_HPP__
 #define IPLATFORM_HPP__
 
-#include "Common.hpp"
+#include "common.hpp"
 
 /* ***************************************************************  */
 
 namespace socialmedia_signer {
 
 /**
- * Abstract interface class which needs to be implemented by every
+ * Abstract interface class which needs to be implemented for every
  * supported social media platform.
  */
 class IPlatform

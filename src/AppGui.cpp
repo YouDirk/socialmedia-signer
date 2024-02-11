@@ -16,25 +16,25 @@
  */
 
 
-#include "Common.hpp"
+#include "AppGui.hpp"
 
 /* ***************************************************************  */
 
-int
-socialmedia_signer::Common::exit_code = -1;
-
-/* ***************************************************************  */
-
-void
-socialmedia_signer::Common::set_exit_code(int exit_code)
+socialmedia_signer::AppGui::AppGui()
+  :App()
 {
-  Common::exit_code = exit_code;
 }
 
-int
-socialmedia_signer::Common::get_exit_code()
+socialmedia_signer::AppGui::~AppGui()
 {
-  return Common::exit_code;
+}
+
+void
+socialmedia_signer::AppGui::run() const noexcept(false)
+{
+  App::run();
+
+  Log::warn(u8"Not implemented -- GUI should run now.");
 }
 
 /* ***************************************************************  */

@@ -16,7 +16,7 @@
  */
 
 
-#include "Log.hpp"
+#include "common.hpp"
 
 #include "Params.hpp"
 

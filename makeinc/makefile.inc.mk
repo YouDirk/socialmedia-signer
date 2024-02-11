@@ -15,8 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-include ../makefile.config.mk
-
 include ../.makefile.cache.mk
 
 include ../makeinc/makefile.variables.mk

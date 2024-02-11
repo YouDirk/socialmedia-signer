@@ -20,33 +20,12 @@
 
 /* ***************************************************************  */
 
-socialmedia_signer::Error::Error(const ustr& reason, int exit_code)
-  :std::runtime_error(""), reason(reason), exit_code(exit_code)
+socialmedia_signer::Success::Success()
+  :Error(u8"Success.", 0)
 {
-  this->reason.out_utf8(const_cast<std::u8string&>(this->reason_buf));
 }
 
-socialmedia_signer::Error::~Error()
+socialmedia_signer::Success::~Success()
 {}
-
-/* ***************************************************************  */
-
-const char*
-socialmedia_signer::Error::what() const noexcept
-{
-  return reinterpret_cast<const char*>(this->reason_buf.data());
-}
-
-const socialmedia_signer::ustr&
-socialmedia_signer::Error::uwhat() const noexcept
-{
-  return this->reason;
-}
-
-int
-socialmedia_signer::Error::get_exit_code()
-{
-  return this->exit_code;
-}
 
 /* ***************************************************************  */

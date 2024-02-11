@@ -19,7 +19,7 @@
 #ifndef ERROR_HPP__
 #define ERROR_HPP__
 
-#include "Common.hpp"
+#include "common.hpp"
 
 /* ***************************************************************  */
 
@@ -31,15 +31,19 @@ namespace socialmedia_signer {
 class Error: public std::runtime_error
 {
 public:
-  explicit Error(const ustr& reason);
+  explicit Error(const ustr& reason, int exit_code = 1);
   virtual ~Error();
 
   virtual const char* what() const noexcept override;
   virtual const ustr& uwhat() const noexcept;
 
+  virtual int get_exit_code();
+
 private:
   const ustr reason;
   const std::u8string reason_buf;
+
+  const int exit_code;
 };
 
 }

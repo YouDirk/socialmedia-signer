@@ -171,12 +171,10 @@ socialmedia_signer::Params::init(int argc, const char** argv)
   switch (subcmd->abbr) {
   case u8'V':
     instance->print_version();
-    Common::set_exit_code(0);
-    break;
+    throw Success();
   case u8'?':
     instance->print_help();
-    Common::set_exit_code(0);
-    break;
+    throw Success();
   default: break;
   }
 }

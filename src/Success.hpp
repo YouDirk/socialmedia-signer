@@ -16,12 +16,10 @@
  */
 
 
-#ifndef APP_HPP__
-#define APP_HPP__
+#ifndef SUCCESS_HPP__
+#define SUCCESS_HPP__
 
-#include "IPlatform.hpp"
-#include "Image.hpp"
-#include "SignedData.hpp"
+#include "Error.hpp"
 
 #include "common.hpp"
 
@@ -30,41 +28,17 @@
 namespace socialmedia_signer {
 
 /**
- * Class which implements the core functionality of the Socialmedia
- * Signer.
- *
- * This class will be instantiated directly for the command-line
- * version and is the base class of AppGui.
+ * Just `Error(u8"Success.", 0)`.
  */
-class App
+class Success: public Error
 {
 public:
-  explicit App();
-  virtual ~App();
-
-  /* -------------------------------------------------------------  */
-
-  virtual void run() const noexcept(false);
-
-  /* -------------------------------------------------------------  */
-
-protected:
-
-  virtual const SignedData& sign(const IPlatform& platform,
-    const ustr& message, const Image* image = nullptr)
-    const noexcept(false);
-
-  virtual const SignedData& verify(const ustr& url)
-    const noexcept(false);
-
-  /* -------------------------------------------------------------  */
-
-private:
-  SignedData* signed_data;
+  explicit Success();
+  virtual ~Success();
 };
 
 }
 
 /* ***************************************************************  */
 
-#endif /* APP_HPP__  */
+#endif /* SUCCESS_HPP__  */
