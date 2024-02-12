@@ -73,7 +73,7 @@ socialmedia_signer::App::run() const noexcept(false)
 /* ---------------------------------------------------------------  */
 
 const socialmedia_signer::SignedData&
-socialmedia_signer::App::sign(const IPlatform& platform,
+socialmedia_signer::App::sign(const Platform& platform,
   const ustr& message, const Image* image) const noexcept(false)
 {
   if (this->signed_data == nullptr) throw Error(u8"Not implemented!");

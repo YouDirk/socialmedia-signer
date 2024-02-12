@@ -21,7 +21,7 @@
 /* ***************************************************************  */
 
 socialmedia_signer::PlatformThreads::PlatformThreads()
-  :IPlatform(u8"threads", u8"Threads by Instagram")
+  :Platform(u8"threads", u8"Threads by Instagram")
 {
 }
 

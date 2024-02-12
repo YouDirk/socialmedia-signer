@@ -19,7 +19,7 @@
 #ifndef PLATFORMTHREADS_HPP__
 #define PLATFORMTHREADS_HPP__
 
-#include "IPlatform.hpp"
+#include "Platform.hpp"
 
 #include "common.hpp"
 
@@ -30,7 +30,7 @@ namespace socialmedia_signer {
 /**
  * threads.net / Threads by Instagram
  */
-class PlatformThreads: public IPlatform
+class PlatformThreads: public Platform
 {
 public:
   explicit PlatformThreads();

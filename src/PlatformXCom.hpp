@@ -19,7 +19,7 @@
 #ifndef PLATFORMXCOM_HPP__
 #define PLATFORMXCOM_HPP__
 
-#include "IPlatform.hpp"
+#include "Platform.hpp"
 
 #include "common.hpp"
 
@@ -30,7 +30,7 @@ namespace socialmedia_signer {
 /**
  * X.com / Twitter
  */
-class PlatformXCom: public IPlatform
+class PlatformXCom: public Platform
 {
 public:
   explicit PlatformXCom();

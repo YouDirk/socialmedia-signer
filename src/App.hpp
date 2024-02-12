@@ -19,7 +19,7 @@
 #ifndef APP_HPP__
 #define APP_HPP__
 
-#include "IPlatform.hpp"
+#include "Platform.hpp"
 #include "Image.hpp"
 #include "SignedData.hpp"
 
@@ -50,7 +50,7 @@ public:
 
 protected:
 
-  virtual const SignedData& sign(const IPlatform& platform,
+  virtual const SignedData& sign(const Platform& platform,
     const ustr& message, const Image* image = nullptr)
     const noexcept(false);
 

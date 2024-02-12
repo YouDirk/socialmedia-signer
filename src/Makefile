@@ -21,7 +21,7 @@ include ../makefile.config.mk
 
 OUTPUT := socialmedia-signer
 
-OBJ := ustr Log Error Success Params Image SignedData IPlatform App \
+OBJ := ustr Log Error Success Params Image SignedData Platform App \
        main \
        \
        PlatformXCom \

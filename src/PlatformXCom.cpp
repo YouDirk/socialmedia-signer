@@ -21,7 +21,7 @@
 /* ***************************************************************  */
 
 socialmedia_signer::PlatformXCom::PlatformXCom()
-  :IPlatform(u8"xcom", u8"X.com by Elon Musk (former Twitter)")
+  :Platform(u8"xcom", u8"X.com by Elon Musk (former Twitter)")
 {
 }
 
