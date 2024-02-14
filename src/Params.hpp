@@ -29,14 +29,16 @@
 namespace socialmedia_signer {
 
 /**
- * Singleton class which can be accessed via Params::get().  Process
- * wide it provides access to the parsed command-line subcommand/s via
- * Params::get_subcommand() and it´s subarguments via
+ * Singleton class which can be accessed via Params::get().  It
+ * provides process wide access to the parsed command-line
+ * subcommand/s via Params::get_subcommand() and it´s subarguments via
  * Params::get_subargument().
  */
 class Params
 {
 public:
+
+  class CmdErr: public Error { public: CmdErr(const ustr& reason); };
 
   struct Subargument {
     Subargument(const ustr name, const char32_t abbr,
@@ -85,7 +87,11 @@ public:
   virtual void print_version() const;
   virtual void print_help() const;
 
+  /**
+   * Returns `nullptr` if no subcommand was given via command-line.
+   */
   virtual const Subcommand* get_subcommand() const;
+
   virtual const Subcommand& get_subcommand(const char32_t scmd_abbr)
     const;
   virtual const Subargument& get_subargument(const char32_t sarg_abbr)
@@ -93,7 +99,6 @@ public:
 
   /* -------------------------------------------------------------  */
 protected:
-  class CmdErr: public Error { public: CmdErr(const ustr& reason); };
 
   virtual const ustr format(const Subargument& subarg, bool abbr=false,
                             bool optional=false) const;
@@ -104,7 +109,7 @@ protected:
     std::map<char32_t, ustr>& parsed_abbrs) noexcept(false);
   virtual void check_subaruments(
     std::forward_list<Subargument>* subargs,
-    std::map<char32_t, Subargument*>* subarg_map,
+    std::map<char32_t, Subargument&>* subarg_map,
     std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs) const noexcept(false);
 
@@ -169,13 +174,15 @@ private:
    */
   static ustr command_name;
 
-  /* Memory location of subcommands and -arguments.  */
+  /** Memory location of subarguments.  */
   std::forward_list<Subargument> subargs;
+  /** Memory location of subcommands.  */
   std::forward_list<Subcommand>  subcmds;
 
-  /* Used to lookup the lists above.  */
-  std::map<char32_t, Subargument*> subarg_map;
-  std::map<char32_t, Subcommand*>  subcmd_map;
+  /** Used to lookup the list Params::subargs .  */
+  std::map<char32_t, Subargument&> subarg_map;
+  /** Used to lookup the list Params::subcmds .  */
+  std::map<char32_t, Subcommand&>  subcmd_map;
 
   const Subcommand* subcommand;
 

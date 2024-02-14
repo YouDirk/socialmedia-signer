@@ -31,13 +31,13 @@ socialmedia_signer::Platform::~Platform()
 }
 
 const socialmedia_signer::ustr&
-socialmedia_signer::Platform::get_id()
+socialmedia_signer::Platform::get_id() const
 {
   return this->id;
 }
 
 const socialmedia_signer::ustr&
-socialmedia_signer::Platform::get_name()
+socialmedia_signer::Platform::get_name() const
 {
   return this->name;
 }

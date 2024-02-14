@@ -18,6 +18,7 @@
 
 #include "App.hpp"
 
+#include "Platforms.hpp"
 #include "Params.hpp"
 
 /* ***************************************************************  */
@@ -57,12 +58,29 @@ socialmedia_signer::App::run() const noexcept(false)
   /* Subcommand via command-line.  Apply it and terminate with
    * Success().
    */
+  Platforms* platforms = Platforms::get();
+  Platform* platform = nullptr;
   switch (scmd->abbr) {
-  case U's':        /* --sign  */
-    Log::debug(u8"--sign");
+  case U's':
+    platform = platforms->get_by_id(scmd->set_value);
+
+    if (platform == nullptr) {
+      throw Params::CmdErr(ustr::format(
+        "--sign social media platform '{}' not supported!",
+        scmd->set_value, Params::get_command_name()));
+    }
+
+    Log::debug(ustr::format("********* --sign={}   {}",
+                            platform->get_id(), platform->get_name()));
+
+    // TODO: call this->sign()
+
     break;
-  case U'v':        /* --sign  */
+  case U'v':
     Log::debug(u8"--verify");
+
+    // TODO: call this->verify()
+
     break;
   default: break;
   }
@@ -84,6 +102,8 @@ socialmedia_signer::App::sign(const Platform& platform,
 const socialmedia_signer::SignedData&
 socialmedia_signer::App::verify(const ustr& url) const noexcept(false)
 {
+  // TODO: find Platform* by <url>
+
   if (this->signed_data == nullptr) throw Error(u8"Not implemented!");
 
   return *this->signed_data;

@@ -17,6 +17,7 @@
 
 
 #include "Params.hpp"
+#include "Platforms.hpp"
 
 #ifdef CONFIG_GUI
 #  include "AppGui.hpp"
@@ -42,6 +43,7 @@ main(int argc, const char** argv)
   MTRACE();
   try {
 
+    Platforms::init();
     Params::init(argc, argv);
 
     /* -----------------------------------------------------------  */
@@ -70,6 +72,7 @@ main(int argc, const char** argv)
   /* -------------------------------------------------------------  */
 
   Params::release();
+  Platforms::release();
 
   MUNTRACE();
 

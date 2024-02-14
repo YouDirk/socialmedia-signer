@@ -18,6 +18,8 @@
 
 #include "Params.hpp"
 
+#include "Platforms.hpp"
+
 #include <vector>
 
 #define IS_CHAR_ALPHANUM(ch)      ( ((ch) >= u8'a' && (ch) <= u8'z') \
@@ -33,6 +35,14 @@ socialmedia_signer::Params::command_name = u8"socialmedia-signer_";
 
 socialmedia_signer::Params*
 socialmedia_signer::Params::instance = nullptr;
+
+/* ***************************************************************  */
+
+socialmedia_signer::Params::CmdErr::CmdErr(const ustr& reason)
+  :Error(ustr::format(
+    "command-line: {}  Try '{} --help' for full help.",
+    reason, Params::get_command_name()))
+{}
 
 /* ***************************************************************  */
 
@@ -259,16 +269,23 @@ socialmedia_signer::Params::print_help() const
   Log::println(u8"\nSubcommands:");
 
   for (const Subcommand& scmd: this->subcmds) {
-    Log::println(
-      ustr::format("  -{}, {: <19} {}",
+    Log::println(ustr::format("  -{}, {: <19} {}",
         scmd.abbr, this->format(scmd, false), scmd.description));
   }
   Log::println(u8"\nSubarguments:");
 
   for (const Subargument& sarg: this->subargs) {
-    Log::println(
-      ustr::format("  -{}, {: <19} {}",
+    Log::println(ustr::format("  -{}, {: <19} {}",
         sarg.abbr, this->format(sarg, false), sarg.description));
+  }
+  Log::println(u8"\nPlatforms:");
+
+  Platforms* platforms = Platforms::get();
+  Log::println(ustr::format("  {: ^23} {}",
+      u8"<platform>", u8"*** platform name ***"));
+  for (Platform& platform: *platforms) {
+    Log::println(ustr::format("  {: ^23} {}",
+        platform.get_id(), platform.get_name()));
   }
 
   Log::println();
@@ -292,7 +309,7 @@ socialmedia_signer::Params::get_subcommand(const char32_t scmd_abbr)
                             scmd_abbr));
   }
 
-  return *scmd_search->second;
+  return scmd_search->second;
 }
 
 const socialmedia_signer::Params::Subargument&
@@ -306,7 +323,7 @@ socialmedia_signer::Params::get_subargument(const char32_t sarg_abbr)
                             sarg_abbr));
   }
 
-  return *sarg_search->second;
+  return sarg_search->second;
 }
 
 /* ***************************************************************  */
@@ -359,7 +376,7 @@ socialmedia_signer::Params::check_subcommands(
 {
   this->check_subaruments(
     reinterpret_cast<std::forward_list<Subargument>*>(&this->subcmds),
-    reinterpret_cast<std::map<char32_t, Subargument*>*>(&this->subcmd_map),
+    reinterpret_cast<std::map<char32_t, Subargument&>*>(&this->subcmd_map),
     parsed_names, parsed_abbrs);
 
   for (const Subcommand& scmd: this->subcmds) {
@@ -375,7 +392,7 @@ socialmedia_signer::Params::check_subcommands(
          *sarg_req_abbr != U'\0'; sarg_req_abbr++) {
       const auto& sarg_search = this->subarg_map.find(*sarg_req_abbr);
       if (sarg_search != subarg_map.end()
-          && sarg_search->second->set) continue;
+          && sarg_search->second.set) continue;
 
       throw CmdErr(ustr::format("subcommand --{} requires -{} to be set !",
         scmd.name, *sarg_req_abbr));
@@ -410,7 +427,7 @@ socialmedia_signer::Params::check_subcommands(
 void
 socialmedia_signer::Params::check_subaruments(
   std::forward_list<Subargument>* subargs,
-  std::map<char32_t, Subargument*>* subarg_map,
+  std::map<char32_t, Subargument&>* subarg_map,
   std::map<ustr, ustr>& parsed_names,
   std::map<char32_t, ustr>& parsed_abbrs) const noexcept(false)
 {
@@ -454,7 +471,7 @@ socialmedia_signer::Params::check_subaruments(
         sarg.name, sarg.name, sarg.value_doc));
     }
 
-    const auto& [_, success] = subarg_map->insert({sarg.abbr, &sarg});
+    const auto& [_, success] = subarg_map->insert({sarg.abbr, sarg});
     if (!success) {
       Log::fatal(ustr::format(
         "Could not insert subargument --{}, -{}, '{}'!  Double insert?",
@@ -619,13 +636,5 @@ socialmedia_signer::Params::parse_argv_next(
                               abbr_name));
   }
 }
-
-/* ---------------------------------------------------------------  */
-
-socialmedia_signer::Params::CmdErr::CmdErr(const ustr& reason)
-  :Error(ustr::format(
-    "command-line: {}  Try '{} --help' for full help.",
-    reason, Params::get_command_name()))
-{}
 
 /* ***************************************************************  */

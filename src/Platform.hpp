@@ -35,8 +35,8 @@ public:
   explicit Platform(const ustr& id, const ustr& name);
   virtual ~Platform();
 
-  const ustr& get_id();
-  const ustr& get_name();
+  virtual const ustr& get_id() const;
+  virtual const ustr& get_name() const;
 
 private:
   /** Used as abbreviation for command-line parameters.  */
