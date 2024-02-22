@@ -42,7 +42,7 @@ public:
 
   /* -------------------------------------------------------------  */
 
-  virtual void run() const noexcept(false) override;
+  virtual void run() noexcept(false) override;
 
   /* -------------------------------------------------------------  */
 };

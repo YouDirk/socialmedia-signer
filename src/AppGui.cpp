@@ -30,7 +30,7 @@ socialmedia_signer::AppGui::~AppGui()
 }
 
 void
-socialmedia_signer::AppGui::run() const noexcept(false)
+socialmedia_signer::AppGui::run() noexcept(false)
 {
   App::run();
 
