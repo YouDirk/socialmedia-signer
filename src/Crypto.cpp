@@ -16,33 +16,47 @@
  */
 
 
-#include "SignedData.hpp"
+#include "Crypto.hpp"
 
 /* ***************************************************************  */
 
-socialmedia_signer::SignedData::SignedData(
-  const std::u8string& signed_msg, const Image* signature)
-  :message(signed_msg), signature(signature)
+socialmedia_signer::Crypto*
+socialmedia_signer::Crypto::instance = nullptr;
+
+/* ***************************************************************  */
+
+socialmedia_signer::Crypto::Crypto()
 {
 }
 
-socialmedia_signer::SignedData::~SignedData()
+socialmedia_signer::Crypto::~Crypto()
 {
-  delete this->signature;
 }
 
 /* ***************************************************************  */
 
 void
-socialmedia_signer::SignedData::sign() noexcept(false)
+socialmedia_signer::Crypto::init()
 {
-  // TODO: Call Crypto layer
+  if (Crypto::instance != nullptr)
+    Log::fatal(u8"Crypto::init(): double call!");
+
+  Crypto::instance = new Crypto();
 }
 
 void
-socialmedia_signer::SignedData::verify() const noexcept(false)
+socialmedia_signer::Crypto::release()
 {
-  // TODO: Call Crypto layer
+  delete Crypto::instance;
+}
+
+socialmedia_signer::Crypto*
+socialmedia_signer::Crypto::get()
+{
+  if (Crypto::instance == nullptr)
+    Log::fatal(u8"Crypto::init() not called!");
+
+  return Crypto::instance;
 }
 
 /* ***************************************************************  */

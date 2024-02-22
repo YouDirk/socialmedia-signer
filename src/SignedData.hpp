@@ -39,6 +39,11 @@ public:
     const std::u8string& signed_msg, const Image* signature);
   virtual ~SignedData();
 
+  // TODO: Comment: Throws an Crypto exception.
+  virtual void sign() noexcept(false);
+  // TODO: Comment: Throws an Crypto exception.
+  virtual void verify() const noexcept(false);
+
 private:
   /**
    * Signed messages are needed to be `char8_t*` to make sure that

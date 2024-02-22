@@ -22,7 +22,7 @@ include ../makefile.config.mk
 OUTPUT := socialmedia-signer
 
 OBJ := ustr Log Error Success Params Image SignedData Platform \
-       Platforms App main \
+       Platforms Crypto App main \
        \
        PlatformXCom \
        PlatformThreads

@@ -16,8 +16,9 @@
  */
 
 
-#include "Params.hpp"
 #include "Platforms.hpp"
+#include "Params.hpp"
+#include "Crypto.hpp"
 
 #ifdef CONFIG_GUI
 #  include "AppGui.hpp"
@@ -45,6 +46,7 @@ main(int argc, const char** argv)
 
     Platforms::init();
     Params::init(argc, argv);
+    Crypto::init();
 
     /* -----------------------------------------------------------  */
 
@@ -71,6 +73,7 @@ main(int argc, const char** argv)
 
   /* -------------------------------------------------------------  */
 
+  Crypto::release();
   Params::release();
   Platforms::release();
 

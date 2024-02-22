@@ -104,8 +104,8 @@ socialmedia_signer::App::sign(const Platform& platform,
   message.out_utf8(message_utf8);
 
   this->set_signed_data(new SignedData(message_utf8, image));
+  this->signed_data->sign();
 
-  // TODO: sign this->signed_data using method in class SignedData
   // TODO: post this->signed_data to Platform& platform;
 
   Log::debug(ustr::format("SIGN: {}, message='{}', image={}",
@@ -123,7 +123,7 @@ socialmedia_signer::App::verify(const ustr& url) noexcept(false)
   if (this->signed_data == nullptr)
     throw Error(u8"App::verify(): Not implemented!");
 
-  // TODO: verify this->signed_data using method in class SignedData
+  this->signed_data->verify();
 }
 
 /* ***************************************************************  */

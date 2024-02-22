@@ -16,33 +16,40 @@
  */
 
 
-#include "SignedData.hpp"
+#ifndef CRYPTO_HPP__
+#define CRYPTO_HPP__
+
+#include "common.hpp"
 
 /* ***************************************************************  */
 
-socialmedia_signer::SignedData::SignedData(
-  const std::u8string& signed_msg, const Image* signature)
-  :message(signed_msg), signature(signature)
-{
-}
+namespace socialmedia_signer {
 
-socialmedia_signer::SignedData::~SignedData()
+/**
+ * Singleton class which can be accessed via Crypto::get().  It
+ * provides process wide access to an abstraction layer of the linked
+ * `libcrypto` library as part of the OpenSSL SSL/TLS `libssl`
+ * library.
+ */
+class Crypto
 {
-  delete this->signature;
+public:
+  /* Singleton class  */
+  static void init();
+  static void release();
+
+  /* Get instance of singleton  */
+  static Crypto* get();
+
+private:
+  explicit Crypto();
+  virtual ~Crypto();
+
+  static Crypto* instance;
+};
+
 }
 
 /* ***************************************************************  */
 
-void
-socialmedia_signer::SignedData::sign() noexcept(false)
-{
-  // TODO: Call Crypto layer
-}
-
-void
-socialmedia_signer::SignedData::verify() const noexcept(false)
-{
-  // TODO: Call Crypto layer
-}
-
-/* ***************************************************************  */
+#endif /* CRYPTO_HPP__  */
