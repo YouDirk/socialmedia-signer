@@ -30,15 +30,18 @@ socialmedia_signer::App::App()
 
 socialmedia_signer::App::~App()
 {
+  delete this->signed_data;
 }
 
 /* ---------------------------------------------------------------  */
 
 void
-socialmedia_signer::App::run() const noexcept(false)
+socialmedia_signer::App::run() noexcept(false)
 {
   const Params* params = Params::get();
   const Params::Subcommand* scmd = params->get_subcommand();
+
+  Platforms* platforms = Platforms::get();
 
   /* Subcommand via command-line?
    *
@@ -52,14 +55,17 @@ socialmedia_signer::App::run() const noexcept(false)
     Log::println(ustr::format("\n  Usage: {} --help\n", cmd_name));
 #endif
 
+    /* Regularly control-flow:  run GUI if compiled.  */
     return;
   }
 
   /* Subcommand via command-line.  Apply it and terminate with
    * Success().
    */
-  Platforms* platforms = Platforms::get();
+  const Params::Subargument& sarg_message = params->get_subargument(U'm');
+  const Params::Subargument& sarg_image = params->get_subargument(U'i');
   Platform* platform = nullptr;
+  const Image* image = nullptr;
   switch (scmd->abbr) {
   case U's':
     platform = platforms->get_by_id(scmd->set_value);
@@ -70,43 +76,63 @@ socialmedia_signer::App::run() const noexcept(false)
         scmd->set_value, Params::get_command_name()));
     }
 
-    Log::debug(ustr::format("********* --sign={}   {}",
-                            platform->get_id(), platform->get_name()));
+    image = sarg_image.set
+      ? new Image(sarg_image.set_value): new Image();
 
-    // TODO: call this->sign()
+    this->sign(*platform, sarg_message.set_value, image);
 
     break;
   case U'v':
-    Log::debug(u8"--verify");
-
-    // TODO: call this->verify()
-
+    this->verify(scmd->set_value);
     break;
   default: break;
   }
 
+  /* Throw to make sure that AppGui::run() will not execute GUI.
+   * Regularly control-flow above `if (scmd == nullptr)`.
+   */
   throw Success();
 }
 
 /* ---------------------------------------------------------------  */
 
-const socialmedia_signer::SignedData&
+void
 socialmedia_signer::App::sign(const Platform& platform,
-  const ustr& message, const Image* image) const noexcept(false)
+  const ustr& message, const Image* image) noexcept(false)
 {
-  if (this->signed_data == nullptr) throw Error(u8"Not implemented!");
+  std::u8string message_utf8;
+  message.out_utf8(message_utf8);
 
-  return *this->signed_data;
+  this->set_signed_data(new SignedData(message_utf8, image));
+
+  // TODO: sign this->signed_data using method in class SignedData
+  // TODO: post this->signed_data to Platform& platform;
+
+  Log::debug(ustr::format("SIGN: {}, message='{}', image={}",
+             platform.get_name(), message, image->to_string()));
 }
 
-const socialmedia_signer::SignedData&
-socialmedia_signer::App::verify(const ustr& url) const noexcept(false)
+void
+socialmedia_signer::App::verify(const ustr& url) noexcept(false)
 {
+  Log::debug(ustr::format("VERIFY: post_url={}", url));
+
   // TODO: find Platform* by <url>
+  // TODO: download post from platform and set this->signed_data
 
-  if (this->signed_data == nullptr) throw Error(u8"Not implemented!");
+  if (this->signed_data == nullptr)
+    throw Error(u8"App::verify(): Not implemented!");
 
-  return *this->signed_data;
+  // TODO: verify this->signed_data using method in class SignedData
+}
+
+/* ***************************************************************  */
+
+void
+socialmedia_signer::App::set_signed_data(SignedData* new_signed_data)
+{
+  delete this->signed_data;
+  this->signed_data = new_signed_data;
 }
 
 /* ***************************************************************  */

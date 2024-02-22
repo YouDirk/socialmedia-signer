@@ -44,22 +44,29 @@ public:
 
   /* -------------------------------------------------------------  */
 
-  virtual void run() const noexcept(false);
+  virtual void run() noexcept(false);
 
   /* -------------------------------------------------------------  */
 
 protected:
 
-  virtual const SignedData& sign(const Platform& platform,
-    const ustr& message, const Image* image = nullptr)
-    const noexcept(false);
+  virtual void sign(const Platform& platform, const ustr& message,
+    const Image* image) noexcept(false);
 
-  virtual const SignedData& verify(const ustr& url)
-    const noexcept(false);
+  virtual void verify(const ustr& url) noexcept(false);
 
   /* -------------------------------------------------------------  */
 
 private:
+  /**
+   * Calls should look like
+   *
+   * ```cpp
+   *   this->set_signed_data(new SignedData(...));
+   * ```
+   */
+  void set_signed_data(SignedData* new_signed_data);
+
   SignedData* signed_data;
 };
 

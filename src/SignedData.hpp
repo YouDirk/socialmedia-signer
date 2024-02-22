@@ -36,7 +36,7 @@ class SignedData
 {
 public:
   explicit SignedData(
-    const std::u8string& signed_msg, const Image& signature);
+    const std::u8string& signed_msg, const Image* signature);
   virtual ~SignedData();
 
 private:
@@ -46,7 +46,7 @@ private:
    * errors.
    */
   const std::u8string message;
-  const Image signature;
+  const Image* signature;
 };
 
 }

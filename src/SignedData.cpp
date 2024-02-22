@@ -21,13 +21,14 @@
 /* ***************************************************************  */
 
 socialmedia_signer::SignedData::SignedData(
-  const std::u8string& signed_msg, const Image& signature)
+  const std::u8string& signed_msg, const Image* signature)
   :message(signed_msg), signature(signature)
 {
 }
 
 socialmedia_signer::SignedData::~SignedData()
 {
+  delete this->signature;
 }
 
 /* ***************************************************************  */

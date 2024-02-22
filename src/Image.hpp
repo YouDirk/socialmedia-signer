@@ -32,8 +32,25 @@ namespace socialmedia_signer {
 class Image
 {
 public:
+  /**
+   * Open empty image for signature only, without custom background.
+   */
   explicit Image();
+  /**
+   * Open image from `filename` as custom background or as a signature
+   * to analyze.
+   */
+  explicit Image(const ustr& filename);
   virtual ~Image();
+
+  virtual bool is_empty() const;
+  virtual const ustr& to_string() const;
+
+private:
+  static const ustr EMPTY_IMAGE_STR;
+
+  const ustr filename;
+  int* image;
 };
 
 }

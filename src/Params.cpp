@@ -70,7 +70,7 @@ socialmedia_signer::Params::Subcommand::Subcommand(
 
 socialmedia_signer::Params::Params(int argc, const char** argv)
   :subargs({
-     Subargument(u8"text", u8't',
+     Subargument(u8"message", u8'm',
        u8"text message to sign or verify",
        u8"<message>", true, false),
      Subargument(u8"image", u8'i',
@@ -81,7 +81,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
      Subcommand(u8"sign", u8's',
        u8"post a signed message to <platform>",
        u8"<platform>", true, false,
-       U"t",
+       U"m",
        U"i"),
      Subcommand(u8"verify", u8'v',
        u8"verify a post with a QR signature at <url>",

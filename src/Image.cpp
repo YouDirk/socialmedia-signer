@@ -20,12 +20,39 @@
 
 /* ***************************************************************  */
 
+const socialmedia_signer::ustr
+socialmedia_signer::Image::EMPTY_IMAGE_STR = u8"<empty>";
+
+/* ***************************************************************  */
+
 socialmedia_signer::Image::Image()
+  :filename(), image(nullptr)
+{
+}
+
+socialmedia_signer::Image::Image(const ustr& filename)
+  :filename(filename), image(new int)
 {
 }
 
 socialmedia_signer::Image::~Image()
 {
+  delete this->image;
+}
+
+/* ***************************************************************  */
+
+bool
+socialmedia_signer::Image::is_empty() const
+{
+  return this->image == nullptr;
+}
+
+const socialmedia_signer::ustr&
+socialmedia_signer::Image::to_string() const
+{
+  return this->is_empty()
+    ? Image::EMPTY_IMAGE_STR: this->filename;
 }
 
 /* ***************************************************************  */
