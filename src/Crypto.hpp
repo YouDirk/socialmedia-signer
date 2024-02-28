@@ -30,6 +30,12 @@ namespace socialmedia_signer {
  * provides process wide access to an abstraction layer of the linked
  * `libcrypto` library as part of the OpenSSL SSL/TLS `libssl`
  * library.
+ *
+ * Official OpenSSL documentation for version 3.2 at
+ * https://www.openssl.org/docs/man3.2/index.html
+ *
+ * Also for interest
+ * https://wiki.openssl.org/index.php/API
  */
 class Crypto
 {

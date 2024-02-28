@@ -38,6 +38,60 @@ else
   $(shell echo 'LD = $(LD)' >> $(MAKE_CACHEFILE))
 endif
 
+SED := $(call _CMD_TEST,sed,sed)
+ifeq (,$(SED))
+  $(shell rm -f $(MAKE_CACHEFILE))
+  $(call _CMD_TEST_RESNO_ERR,sed,SED command)
+else
+  $(call _CMD_TEST_RESULT,$(SED))
+  $(shell echo 'SED = $(SED)' >> $(MAKE_CACHEFILE))
+endif
+
+LDCONFIG := $(call _CMD_TEST,ldconfig,ldconfig)
+ifeq (,$(LDCONFIG))
+  $(shell rm -f $(MAKE_CACHEFILE))
+  $(call _CMD_TEST_RESNO_ERR,libc-bin,LDCONFIG command)
+else
+  $(call _CMD_TEST_RESULT,$(LDCONFIG))
+  $(shell echo 'LDCONFIG = $(LDCONFIG)' >> $(MAKE_CACHEFILE))
+endif
+
+LIBCRYPTO := $(call _LIB_TEST,libcrypto)
+ifeq (,$(LIBCRYPTO))
+  $(shell rm -f $(MAKE_CACHEFILE))
+  $(call _CMD_TEST_RESNO_ERR,libssl3,LIBCRYPTO library)
+else
+  $(call _CMD_TEST_RESULT,$(LIBCRYPTO))
+  $(shell echo 'LIBCRYPTO = $(LIBCRYPTO)' >> $(MAKE_CACHEFILE))
+endif
+
+HEADERCRYPTO := $(call _HEADER_TEST,openssl/crypto.h)
+ifeq (,$(HEADERCRYPTO))
+  $(shell rm -f $(MAKE_CACHEFILE))
+  $(call _CMD_TEST_RESNO_ERR,libssl-dev,openssl/crypto.h)
+else
+  $(call _CMD_TEST_RESULT,$(HEADERCRYPTO))
+  $(shell echo 'HEADERCRYPTO = $(HEADERCRYPTO)' >> $(MAKE_CACHEFILE))
+endif
+
+LIBSSL := $(call _LIB_TEST,libssl)
+ifeq (,$(LIBSSL))
+  $(shell rm -f $(MAKE_CACHEFILE))
+  $(call _CMD_TEST_RESNO_ERR,libssl3,LIBSSL library)
+else
+  $(call _CMD_TEST_RESULT,$(LIBSSL))
+  $(shell echo 'LIBSSL = $(LIBSSL)' >> $(MAKE_CACHEFILE))
+endif
+
+HEADERSSL := $(call _HEADER_TEST,openssl/ssl3.h)
+ifeq (,$(HEADERSSL))
+  $(shell rm -f $(MAKE_CACHEFILE))
+  $(call _CMD_TEST_RESNO_ERR,libssl-dev,openssl/ssl3.h)
+else
+  $(call _CMD_TEST_RESULT,$(HEADERSSL))
+  $(shell echo 'HEADERSSL = $(HEADERSSL)' >> $(MAKE_CACHEFILE))
+endif
+
 # --------------------------------------------------------------------
 # optional features
 

@@ -32,8 +32,13 @@ _CMD_TEST = \
   $(eval _CMD_TEST_BUF:=checking for $(2)... )$(\
   )$(shell which $(1) 2> /dev/null)
 _HEADER_TEST = \
-  $(eval _CMD_TEST_BUF:=checking for $(2)... )$(\
+  $(eval _CMD_TEST_BUF:=checking for header $(1)... )$(\
   )$(shell ls /usr/include/$(1) 2> /dev/null)
+_LIB_TEST = \
+  $(eval _CMD_TEST_BUF:=checking for library $(1)... )$(\
+  )$(shell $(LDCONFIG) -p \
+           | $(SED) -n '/$(1)\./{s~[\t ]*\([^ ]\+\).*~\1~;p}' \
+             2> /dev/null)
 
 _CMD_TEST_RESULT = $(info $(_CMD_TEST_BUF)$(1))
 _CMD_TEST_RESNO = $(info $(_CMD_TEST_BUF)no - Debian package $(1))
@@ -65,7 +70,7 @@ LD_PRELOADS    :=
 
 INCLUDE_PATHS  :=
 LD_PATHS       :=
-LIBS           :=
+LIBS           := crypto ssl
 
 ifneq (0,$(DEBUG))
   OPTFLAG        := -O0
