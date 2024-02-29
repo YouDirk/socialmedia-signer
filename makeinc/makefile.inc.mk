@@ -37,7 +37,8 @@ run: all
 	@-rm -f $(MTRACEFILE)
 	$(RUN_ENV) MALLOC_TRACE=$(MTRACEFILE) ./$(OUTPUT) $(ARGS)
 ifneq (,$(HAS_MTRACE))
-	$(MTRACE_OPT) $(OUTPUT) $(MTRACEFILE) || true
+	test -f $(MTRACEFILE)$(\
+	  ) && $(MTRACE_OPT) $(OUTPUT) $(MTRACEFILE) || true
 endif
 
 .PHONY: debug

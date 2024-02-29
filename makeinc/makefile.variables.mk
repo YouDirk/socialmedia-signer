@@ -35,15 +35,15 @@ _HEADER_TEST = \
   $(eval _CMD_TEST_BUF:=checking for header $(1)... )$(\
   )$(shell ls /usr/include/$(1) 2> /dev/null)
 _LIB_TEST = \
-  $(eval _CMD_TEST_BUF:=checking for library $(1)... )$(\
-  )$(shell $(LDCONFIG) -p \
-           | $(SED) -n '/$(1)\./{s~[\t ]*\([^ ]\+\).*~\1~;p}' \
+  $(eval _CMD_TEST_BUF:=checking for library lib$(1)... )$(\
+  )$(shell $(LDCONFIG) -p | $(SED) -n \
+             '/^[\t ]*lib$(1)\./{s~^[\t ]*\([^ ]\+\).*$$~\1~;p}' \
              2> /dev/null)
 
 _CMD_TEST_RESULT = $(info $(_CMD_TEST_BUF)$(1))
 _CMD_TEST_RESNO = $(info $(_CMD_TEST_BUF)no - Debian package $(1))
 _CMD_TEST_RESNO_ERR = $(error $(ERRB) Run (Debian): $$> apt-get install \
-  $(1)$(NL)$(NL) $(2) not found!  After install run '$$> make clean-all')
+  $(1)$(NL)$(NL) $(2) not found!  Install and try again)
 
 # ********************************************************************
 # Common variables
