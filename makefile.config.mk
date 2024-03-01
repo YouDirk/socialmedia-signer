@@ -20,12 +20,12 @@
 # Debug build?  Will be overridden by CI/CD.
 #
 # Possible values: [1, 0], default: 1
-DEBUG               := 1
+DEBUG                            := 1
 
 # See 'Semantic Versioning 2.0.0' for more details.  Will be
 # overridden by CI/CD.
 #
-CONFIG_VERSION      := 0.1.0-dev
+CONFIG_VERSION                   := 0.1.0-dev
 
 # --------------------------------------------------------------------
 
@@ -33,6 +33,39 @@ CONFIG_VERSION      := 0.1.0-dev
 # by CI/CD.
 #
 # Possible values: [1, 0], default: 1
-CONFIG_GUI          := 0
+CONFIG_GUI                       := 0
+
+# ********************************************************************
+# To check which libraries will be loaded dynamically during runtime,
+# after `$> make -j`, try:
+#
+#   $> ldd src/socialmedia-signer
+
+# Link LIBCRYPTO and LIBSSL static into executable.
+#
+# Possible values: [1, 0], default: 0
+CONFIG_STATIC_CRYPTO             := 0
+
+# Link LIBSTDC++ static into executable.
+#
+# Possible values: [1, 0], default: 1
+CONFIG_STATIC_LIBSTDCPP          := 1
+
+# Link LIBGCC static into executable.
+#
+# Possible values: [1, 0], default: 1
+CONFIG_STATIC_LIBGCC             := 1
+
+# (Not recommended) Link a NON-DYNAMIC EXECUTABLE.
+#
+# At least the static call to GETADDRINFO() and GETHOSTBYNAME()
+# enforces to load the dynamic (G)LIBC during runtime using the (not
+# statically linked) library call LIBDL::DLOPEN().
+#
+# Therefore, it results in a very big executable and during runtime
+# the dynamic (G)LIBC load will be enforced.
+#
+# Possible values: [1, 0], default: 0
+CONFIG_STATIC_ALL                := 0
 
 # ********************************************************************

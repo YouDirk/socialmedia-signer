@@ -129,7 +129,7 @@ else
 endif
 
 $(OUTPUT): $(OBJFILES)
-	$(LD) $(LDFLAGS) -o $@ $^ $(addprefix -l,$(LIBS))
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 -include $(DEPFILES)
 

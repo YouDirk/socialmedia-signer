@@ -70,7 +70,7 @@ LD_PRELOADS    :=
 
 INCLUDE_PATHS  :=
 LD_PATHS       :=
-LIBS           := crypto ssl
+LIBS           :=
 
 ifneq (0,$(DEBUG))
   OPTFLAG        := -O0
@@ -84,12 +84,38 @@ ifneq (0,$(DEBUG))
     HAS_MTRACE   := 1
     DFLAGS       += -DHAS_MTRACE
   endif
-else
 endif
 
 ifneq (0,$(CONFIG_GUI))
   DFLAGS         += -DCONFIG_GUI
 endif
+
+# ********************************************************************
+
+ifneq (0,$(CONFIG_STATIC_ALL))
+  LIBS           += -static
+endif
+
+ifneq (0,$(CONFIG_STATIC_LIBGCC))
+  LIBS           += -static-libgcc
+
+  ifeq (0,$(CONFIG_STATIC_LIBSTDCPP))
+    $(error $(ERRB) Dynamic LIBSTDC++ is depending dynamic LIBGCC! \
+      But CONFIG_STATIC_LIBSTDCPP is set in makefile.config.mk)
+  endif
+endif
+
+ifneq (0,$(CONFIG_STATIC_LIBSTDCPP))
+  LIBS           += -l:libstdc++.a
+endif
+
+ifneq (0,$(CONFIG_STATIC_CRYPTO))
+  LIBS           += -l:libssl.a -l:libcrypto.a
+else
+  LIBS           += -lssl -lcrypto
+endif
+
+# ********************************************************************
 
 MTRACEFILE     := mtrace.log
 EBROWSEFILE    := BROWSE
