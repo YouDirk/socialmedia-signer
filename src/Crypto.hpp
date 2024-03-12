@@ -40,12 +40,30 @@ namespace socialmedia_signer {
 class Crypto
 {
 public:
+
+  class CryptoErr: public Error {
+  public:
+    CryptoErr(const ustr& reason);
+  protected:
+    virtual void set_reason(const ustr& reason) override;
+  private:
+    int count_others;
+
+    unsigned long error_code;
+    ustr lib_name;
+    ustr lib_reason;
+  };
+
+  /* -------------------------------------------------------------  */
+
   /* Singleton class  */
   static void init();
   static void release();
 
   /* Get instance of singleton  */
   static Crypto* get();
+
+  /* -------------------------------------------------------------  */
 
 private:
   explicit Crypto();

@@ -21,9 +21,9 @@
 /* ***************************************************************  */
 
 socialmedia_signer::Error::Error(const ustr& reason, int exit_code)
-  :std::runtime_error(""), reason(reason), exit_code(exit_code)
+  :std::runtime_error(""), reason(), _reason_buf(), exit_code(exit_code)
 {
-  this->reason.out_utf8(const_cast<std::u8string&>(this->reason_buf));
+  this->set_reason(reason);
 }
 
 socialmedia_signer::Error::~Error()
@@ -31,10 +31,23 @@ socialmedia_signer::Error::~Error()
 
 /* ***************************************************************  */
 
+socialmedia_signer::Error::Error(int exit_code)
+  :std::runtime_error(""), reason(), _reason_buf(), exit_code(exit_code)
+{}
+
+void
+socialmedia_signer::Error::set_reason(const ustr& reason)
+{
+  this->reason = reason;
+  this->reason.out_utf8(this->_reason_buf);
+}
+
+/* ***************************************************************  */
+
 const char*
 socialmedia_signer::Error::what() const noexcept
 {
-  return reinterpret_cast<const char*>(this->reason_buf.data());
+  return reinterpret_cast<const char*>(this->_reason_buf.data());
 }
 
 const socialmedia_signer::ustr&
@@ -44,7 +57,7 @@ socialmedia_signer::Error::uwhat() const noexcept
 }
 
 int
-socialmedia_signer::Error::get_exit_code()
+socialmedia_signer::Error::get_exit_code() const noexcept
 {
   return this->exit_code;
 }

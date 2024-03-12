@@ -26,11 +26,43 @@
  */
 
 #include <openssl/ssl3.h>
+#include <openssl/err.h>
 
 /* ***************************************************************  */
 
 socialmedia_signer::Crypto*
 socialmedia_signer::Crypto::instance = nullptr;
+
+/* ***************************************************************  */
+
+socialmedia_signer::Crypto::CryptoErr::CryptoErr(const ustr& reason)
+  :Error(), count_others(-1), error_code(0), lib_name(),
+   lib_reason()
+{
+  this->set_reason(reason);
+}
+
+void
+socialmedia_signer::Crypto::CryptoErr::set_reason(const ustr& reason)
+{
+  unsigned long err;
+  while (0 != (err = ERR_get_error())) {
+    this->error_code = err;
+    this->count_others++;
+  }
+
+  const char* lib_name = ERR_lib_error_string(this->error_code);
+  const char* lib_reason = ERR_reason_error_string(this->error_code);
+
+  this->lib_name = lib_name != nullptr
+    ? reinterpret_cast<const char8_t*>(lib_name): u8"<OpenSSL>";
+  this->lib_reason = lib_reason != nullptr
+    ? reinterpret_cast<const char8_t*>(lib_reason): u8"<None>";
+
+  Error::set_reason(ustr::format("SSL:{}(code {}, {:+} others): {} ({})",
+    this->lib_name, this->error_code, this->count_others, reason,
+    this->lib_reason));
+}
 
 /* ***************************************************************  */
 
@@ -50,14 +82,16 @@ socialmedia_signer::Crypto::Crypto()
    *
    * OPENSSL_INIT_ENGINE_* are deprecated since OpenSSL 3.0.
    */
-  OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS
-                   | OPENSSL_INIT_LOAD_CRYPTO_STRINGS
-                   | OPENSSL_INIT_ADD_ALL_CIPHERS /* optimizable  */
-                   | OPENSSL_INIT_ADD_ALL_DIGESTS /* optimizable  */
-                   | OPENSSL_INIT_NO_LOAD_CONFIG
-                /* | OPENSSL_INIT_NO_ATFORK  */
-                   | OPENSSL_INIT_NO_ATEXIT /* FREE in destructor  */
-                   , nullptr);
+  if (OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS
+                       | OPENSSL_INIT_LOAD_CRYPTO_STRINGS
+                       | OPENSSL_INIT_ADD_ALL_CIPHERS /* optimizable  */
+                       | OPENSSL_INIT_ADD_ALL_DIGESTS /* optimizable  */
+                       | OPENSSL_INIT_NO_LOAD_CONFIG
+                    /* | OPENSSL_INIT_NO_ATFORK  */
+                       | OPENSSL_INIT_NO_ATEXIT /* FREE in destructor  */
+                       , nullptr) == 0) {
+    Log::fatal(CryptoErr(u8"Could not OPENSSL_init_ssl()!").uwhat());
+  }
 }
 
 socialmedia_signer::Crypto::~Crypto()

@@ -37,11 +37,16 @@ public:
   virtual const char* what() const noexcept override;
   virtual const ustr& uwhat() const noexcept;
 
-  virtual int get_exit_code();
+  virtual int get_exit_code() const noexcept;
+
+protected:
+  explicit Error(int exit_code = 1);
+
+  virtual void set_reason(const ustr& reason);
 
 private:
-  const ustr reason;
-  const std::u8string reason_buf;
+  ustr reason;
+  std::u8string _reason_buf;
 
   const int exit_code;
 };
