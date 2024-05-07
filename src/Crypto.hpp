@@ -50,9 +50,16 @@ public:
     int count_others;
 
     unsigned long error_code;
+    ustr file_name;
+    int  file_line;
     ustr lib_name;
+    ustr func_name;
     ustr lib_reason;
+    ustr data;
+    int  flags;
   };
+
+  struct private_key;
 
   /* -------------------------------------------------------------  */
 
@@ -65,6 +72,10 @@ public:
 
   /* -------------------------------------------------------------  */
 
+  virtual struct private_key* priv_generate_new() const;
+  virtual void priv_delete(struct private_key* priv_key) const;
+
+  /* -------------------------------------------------------------  */
 private:
   explicit Crypto();
   virtual ~Crypto();

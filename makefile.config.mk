@@ -22,6 +22,24 @@
 # Possible values: [1, 0], default: 1
 DEBUG                            := 1
 
+# Trouble with FIPS support during development?  Not installed?
+#
+# If DEBUG enabled then set this to `/path/to/openssl-src/providers`
+# at which is `fips.so` located after compilation of OpenSSL.
+#
+# To compile fips.so do
+#
+# ```shell
+# $> git clone https://github.com/openssl/openssl.git
+# $> cd openssl
+# $> git checkout openssl-x.y.z
+# $> ./Configure enable-fips
+# $> make -j
+# ```
+#
+# Possible values: [/search/path, <empty>], default: <empty>
+DEBUG_CRYPTO_FIPS_SEARCHPATH     :=
+
 # See 'Semantic Versioning 2.0.0' for more details.  Will be
 # overridden by CI/CD.
 #

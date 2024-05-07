@@ -82,6 +82,7 @@ public:
   /* Needs to be static to make it possible that constructor Params()
    * can print output via class Log.
    */
+  static const ustr& get_dir_name();
   static const ustr& get_command_name();
 
   virtual void print_version() const;
@@ -144,7 +145,8 @@ protected:
    *                  parsing <argv>/<argv+1> twice
    */
 
-  virtual void parse_argv0(ustr& out, const ustr& argv0) const;
+  virtual void parse_argv0(ustr& dir_name, ustr& cmd_name,
+    const ustr& argv0) const;
   virtual void parse_argv(std::map<ustr, ustr>& parsed_names,
     std::map<char32_t, ustr>& parsed_abbrs, ustr& argv_next,
     const ustr& argv) const noexcept(false);
@@ -172,6 +174,7 @@ private:
   /* Needs to be static to make it possible that constructor Params()
    * can print output via class Log.
    */
+  static ustr dir_name;
   static ustr command_name;
 
   /** Memory location of subarguments.  */

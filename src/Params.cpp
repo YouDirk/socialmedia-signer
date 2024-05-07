@@ -31,6 +31,8 @@
 /* Using '_' for debugging purposes, should never be printed out.
  */
 socialmedia_signer::ustr
+socialmedia_signer::Params::dir_name = u8"";
+socialmedia_signer::ustr
 socialmedia_signer::Params::command_name = u8"socialmedia-signer_";
 
 socialmedia_signer::Params*
@@ -108,7 +110,7 @@ socialmedia_signer::Params::Params(int argc, const char** argv)
   if (argc < 1)
     Log::fatal(u8"Operating system does not provide argv[0]!");
 
-  this->parse_argv0(Params::command_name, uargv[0]);
+  this->parse_argv0(Params::dir_name, Params::command_name, uargv[0]);
 
   /* -----------------------------------------------------------------
    * Parse command-line parameters into PARSED_NAMES and PARSED_ABBRS.
@@ -202,6 +204,12 @@ socialmedia_signer::Params::get()
     Log::fatal(u8"Command line parameters not parsed!");
 
   return Params::instance;
+}
+
+const socialmedia_signer::ustr&
+socialmedia_signer::Params::get_dir_name()
+{
+  return Params::dir_name;
 }
 
 const socialmedia_signer::ustr&
@@ -483,18 +491,26 @@ socialmedia_signer::Params::check_subaruments(
 /* ***************************************************************  */
 
 void
-socialmedia_signer::Params::parse_argv0(ustr& out, const ustr& argv0)
-  const
+socialmedia_signer::Params::parse_argv0(ustr& dir_name, ustr& cmd_name,
+  const ustr& argv0) const
 {
   if (argv0.empty())
     Log::fatal(u8"argv[0] is empty!  Bad operating system?");
 
-  int i_start;
-  for (i_start=argv0.length(); i_start > 0; i_start--) {
-    char32_t cur = argv0[i_start-1];
-    if (cur == u8'/' || cur == u8'\\') break;
+  int i_cmdstart;
+  bool is_slash = false;
+  for (i_cmdstart=argv0.length(); i_cmdstart > 0; i_cmdstart--) {
+    char32_t cur = argv0[i_cmdstart-1];
+    if (cur == u8'/' || cur == u8'\\') {
+      is_slash = true;
+      break;
+    }
   }
-  out = argv0.substr(i_start);
+
+  int i_dirend = is_slash? i_cmdstart-1: i_cmdstart;
+
+  dir_name = argv0.substr(0, i_dirend);
+  cmd_name = argv0.substr(i_cmdstart);
 
   /* {terminate}  */
 }
