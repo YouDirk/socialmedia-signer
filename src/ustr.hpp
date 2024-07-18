@@ -20,29 +20,44 @@
 #define USTR_HPP__
 
 #include <string>
-#include <codecvt>
 #include <format>
 
 using namespace std::string_literals;
 
 namespace socialmedia_signer {
-
 /* ***************************************************************  */
+
 /**
  * Fully Unicode+UTF-8 supported string.  For UTF-8 input in the
  * sources use the string literals:
  *
- *  1.    const char8_t*           u8"💗 😀 Hello World! 😀 💗"
- *  2. or std::u8string            u8"💗 😀 Hello World! 😀 💗"s
+ *   1.    const char8_t*           u8"💗 😀 Hello World! 😀 💗"
+ *   2. or std::u8string            u8"💗 😀 Hello World! 😀 💗"s
  *
+ * For static initialization of `ustr` use U"" string literal, as the
+ * internally used CODECVT object may not be initialized, i.e.
+ * ```cpp
+ *   static ustr var =  U"💗 😀 Static World! 😀 💗";
+ * ```
+ * otherwise to save space, the default way is
+ * ```cpp
+ *          ustr var = u8"💗 😀 Static World! 😀 💗";
+ * ```
+ * To concatenate strings you can use the operator `+`, such like
+ * ```cpp
+ *         ustr var2 = var + u8" is concatenated.";
+ * ```
+ * To format your output use the static method `ustr::format()` like
+ * ```cpp
+ *       ustr output = ustr::format("note: {} (level {})", var, 5);
+ * ```
  * The socialmedia_signer::ustr then internally is working with UTF-32
  * characters.  Therefore, the access to an character using
  * operator[]() has nearly no time to run.
  *
  * For output to GUI, console or file use this:
  *
- * ```c++
- *
+ * ```cpp
  *   ustr str = u8"💗 😀 Hello World! 😀 💗"
  *
  *   // use it here ...
@@ -71,21 +86,27 @@ public:
   ustr(const char32_t ch);
 
   /* copy assignment  */
-  virtual ustr& operator=(const ustr& msg);
+  ustr& operator=(const ustr& msg);
 
-  virtual ustr& operator=(const char8_t* msg);
-  virtual ustr& operator=(const std::u8string& msg);
+  ustr& operator=(const char8_t* msg);
+  ustr& operator=(const std::u8string& msg);
 
-  virtual ustr& operator=(const char32_t* msg);
-  virtual ustr& operator=(const std::u32string& msg);
-  virtual ustr& operator=(const char32_t ch);
+  ustr& operator=(const char32_t* msg);
+  ustr& operator=(const std::u32string& msg);
+  ustr& operator=(const char32_t ch);
 
-  virtual void out_utf8(std::u8string& out) const;
+  void out_utf8(std::u8string& out) const;
 
-  virtual size_type find(const ustr& msg, size_type pos=0) const
-    noexcept;
-  virtual ustr substr(size_type pos=0, size_type count=npos)
-    const;
+  size_type find(const ustr& msg, size_type pos=0) const;
+  ustr substr(size_type pos = 0, size_type count = npos) const;
+
+  int compare(const ustr& str) const;
+  int compare(size_type pos1, size_type count1, const ustr& str) const;
+  int compare(size_type pos1, size_type count1, const ustr& str,
+              size_type pos2, size_type count2 = npos) const;
+
+  void tolower();
+  void toupper();
 
   template<typename... Args> inline static ustr
     format(const std::format_string<Args...> fmt, Args&&... args)
@@ -97,8 +118,6 @@ public:
   }
 
 private:
-  const std::codecvt<char32_t, char8_t, std::mbstate_t>& cvt_utf8;
-
   void _cvt_in_utf8(const std::u8string& in);
   void _cvt_out_utf8(std::u8string& out) const;
 };
@@ -115,15 +134,16 @@ private:
   ustr operator+(const std::u8string& lhs, const ustr& rhs);
   ustr operator+(const char32_t lhs, const ustr& rhs);
 
+/* ***************************************************************  */
 } /* namespace socialmedia_signer  */
 
-/* -------------------------------------------------------------------
- * std::formatter()´s for socialmedia_signer::format().
+/*
+ * std::formatter()´s for socialmedia_signer::ustr::format().
  */
 
 template<>
 struct std::formatter<socialmedia_signer::ustr, char>
-  :public std::formatter<const char*, char>
+  : public std::formatter<const char*, char>
 {
   /* Just call it from the base class.
    */
@@ -145,9 +165,11 @@ struct std::formatter<socialmedia_signer::ustr, char>
   }
 };
 
-template<size_t size>
+/* ---------------------------------------------------------------  */
+
+template<std::size_t size>
 struct std::formatter<char8_t[size], char>
-  :public std::formatter<const char*, char>
+  : public std::formatter<const char*, char>
 {
   auto format(const char8_t* str, std::format_context& ctx) const
   {
@@ -157,10 +179,80 @@ struct std::formatter<char8_t[size], char>
 };
 
 template<>
+struct std::formatter<char8_t*, char>
+  : public std::formatter<const char*, char>
+{
+  auto format(const char8_t* str, std::format_context& ctx) const
+  {
+    return std::formatter<const char*, char>
+      ::format(reinterpret_cast<const char*>(str), ctx);
+  }
+};
+template<>
+struct std::formatter<const char8_t*, char>
+  : public std::formatter<const char*, char>
+{
+  auto format(const char8_t* str, std::format_context& ctx) const
+  {
+    return std::formatter<const char*, char>
+      ::format(reinterpret_cast<const char*>(str), ctx);
+  }
+};
+
+/* ---------------------------------------------------------------  */
+
+template<>
 struct std::formatter<char32_t, char>
-  :public std::formatter<const char*, char>
+  : public std::formatter<const char*, char>
 {
   auto format(const char32_t str, std::format_context& ctx) const
+  {
+    socialmedia_signer::ustr in = str;
+
+    std::u8string out;
+    in.out_utf8(out);
+
+    return std::formatter<const char*, char>
+      ::format(reinterpret_cast<const char*>(out.data()), ctx);
+  }
+};
+
+template<std::size_t size>
+struct std::formatter<char32_t[size], char>
+  : public std::formatter<const char*, char>
+{
+  auto format(const char32_t* str, std::format_context& ctx) const
+  {
+    socialmedia_signer::ustr in = str;
+
+    std::u8string out;
+    in.out_utf8(out);
+
+    return std::formatter<const char*, char>
+      ::format(reinterpret_cast<const char*>(out.data()), ctx);
+  }
+};
+
+template<>
+struct std::formatter<char32_t*, char>
+  : public std::formatter<const char*, char>
+{
+  auto format(const char32_t* str, std::format_context& ctx) const
+  {
+    socialmedia_signer::ustr in = str;
+
+    std::u8string out;
+    in.out_utf8(out);
+
+    return std::formatter<const char*, char>
+      ::format(reinterpret_cast<const char*>(out.data()), ctx);
+  }
+};
+template<>
+struct std::formatter<const char32_t*, char>
+  : public std::formatter<const char*, char>
+{
+  auto format(const char32_t* str, std::format_context& ctx) const
   {
     socialmedia_signer::ustr in = str;
 
